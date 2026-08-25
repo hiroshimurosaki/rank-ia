@@ -1,0 +1,517 @@
+\documentclass[a4paper,12pt,oneside,openany]{book}
+
+% ============================================================================
+% MODELO DE PROJETO FINAL - ENGENHARIA DE SOFTWARE II
+% UNESP - Faculdade de Ciências - Departamento de Computação
+%
+% COMO USAR:
+% 1) Substituam os textos de orientação pelo conteúdo do projeto.
+% 2) Todo diagrama deve ser acompanhado de explicação no texto.
+% 3) Decisões de projeto relevantes devem ser justificadas.
+% 4) Se uma seção não se aplicar ao sistema, expliquem brevemente o motivo.
+% 5) Priorizem os elementos mais importantes do projeto; não é necessário
+%    documentar todas as classes, telas ou detalhes de implementação.
+% 6) Antes da entrega, alterem \orientacoestrue para \orientacoesfalse.
+% ============================================================================
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{fancyhdr}
+\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+
+\hypersetup{
+    hidelinks,
+    pdftitle={Documentação do Projeto de Software},
+    pdfauthor={Equipe do projeto}
+}
+
+\urlstyle{same}
+
+% ----------------------------------------------------------------------------
+% Exibição das orientações do template
+% ----------------------------------------------------------------------------
+% Troquem para \orientacoesfalse antes de gerar a versão final para entrega.
+\newif\iforientacoes
+\orientacoestrue
+
+\newcommand{\orientacao}[1]{%
+    \iforientacoes
+        \begin{quote}
+        \small\itshape\textbf{Orientação:} #1
+        \end{quote}
+    \fi
+}
+
+% ----------------------------------------------------------------------------
+% Cabeçalho e rodapé
+% ----------------------------------------------------------------------------
+\renewcommand{\headrulewidth}{0pt}
+\fancyhf{}
+
+% ----------------------------------------------------------------------------
+% Informações do trabalho -- atualizar
+% ----------------------------------------------------------------------------
+\newcommand{\school}{Universidade Estadual Paulista ``Júlio de Mesquita Filho'' (UNESP)\\
+Faculdade de Ciências -- Bauru\\
+Departamento de Computação}
+\newcommand{\discipline}{Engenharia de Software II}
+\newcommand{\projtitle}{Título do Software}
+\newcommand{\projsubtitle}{Subtítulo do Software}
+\newcommand{\semester}{2026}
+
+\graphicspath{{images/}}
+
+\title{Documentação do Projeto de Software}
+\author{Equipe do projeto}
+
+\begin{document}
+
+% ============================================================================
+% CAPA
+% ============================================================================
+\thispagestyle{empty}
+\begin{titlepage}
+	\centering
+	
+	% Logotipo da UNESP no topo da página
+	\vspace*{-12mm}
+	\includegraphics[width=75mm]{AV01A.jpg}\\[8mm]
+	
+	{\large\textbf{\school}}
+	
+	\vfill
+	
+	{\huge\textbf{\projtitle}}\\[5mm]
+	{\Large\projsubtitle}
+	
+	\vfill
+	
+	{\Large\textbf{\discipline}}\\[14mm]
+	
+	%{\large\textbf{Estudantes}}\\[4mm]
+	Nome do Autor 1 -- RA: XXXXXXX\\[2mm]
+	Nome do Autor 2 -- RA: XXXXXXX\\[2mm]
+	Nome do Autor 3 -- RA: XXXXXXX\\[2mm]
+	Nome do Autor 4 -- RA: XXXXXXX
+	
+	\vfill
+	
+	{\large Bauru -- SP\\\semester}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+
+\clearpage
+\pagestyle{fancy}
+\cfoot{\thepage}
+\setcounter{page}{1}
+
+\iforientacoes
+\chapter*{Como utilizar este modelo}
+\addcontentsline{toc}{chapter}{Como utilizar este modelo}
+
+Este documento é um roteiro para apoiar a documentação do projeto final.
+Os textos marcados como \textit{Orientação} explicam o que se espera em
+cada parte e podem ser ocultados alterando-se, no início do arquivo,
+\verb|\orientacoestrue| para \verb|\orientacoesfalse|.
+
+O documento deve registrar as principais decisões do projeto, e não apenas
+reunir diagramas. Sempre que uma escolha relevante for apresentada, expliquem
+brevemente a motivação e suas consequências. Diagramas, tabelas e protótipos
+devem ser mencionados e explicados no texto.
+
+Não é necessário documentar todas as classes, telas ou detalhes internos do
+sistema. Em projetos maiores, priorizem os elementos mais relevantes,
+complexos ou representativos.
+
+\clearpage
+\fi
+
+% ============================================================================
+\chapter{Introdução e Objetivos}
+% ============================================================================
+
+\orientacao{Apresentem brevemente o sistema e expliquem o que será documentado
+neste capítulo. O objetivo é permitir que um leitor compreenda o problema e o
+escopo antes de examinar as decisões de projeto.}
+
+\section{Contexto do software}
+
+\orientacao{Contextualizem o problema do ponto de vista dos usuários e da
+atividade que o software deve apoiar, automatizar ou melhorar. Identifiquem os
+principais usuários ou partes interessadas quando isso for relevante.}
+
+\section{Escopo}
+
+\orientacao{Delimitem o que faz parte do sistema e, quando necessário, o que
+está explicitamente fora do escopo. Evitem transformar esta seção em uma
+especificação detalhada de requisitos.}
+
+\section{Visão geral dos requisitos}
+
+\orientacao{Apresentem os requisitos funcionais e não funcionais mais
+importantes para compreender o projeto. Caso a equipe tenha uma especificação
+detalhada de requisitos produzida anteriormente, ela pode ser incluída em um
+apêndice ou referenciada neste documento.}
+
+\section{Objetivos de qualidade}\label{sec:quality-goals}
+
+\orientacao{Identifiquem os atributos de qualidade que realmente influenciam
+as decisões de projeto, por exemplo: manutenibilidade, desempenho, segurança,
+confiabilidade, usabilidade ou portabilidade. Podem ser utilizados modelos
+como ISO/IEC 25010 ou FURPS+, desde que apenas os atributos relevantes ao
+sistema sejam selecionados.}
+
+Uma forma de sintetizar os objetivos e suas implicações é:
+
+\begin{table}[ht]
+\centering
+\caption{Exemplo de objetivos de qualidade.}
+\begin{tabularx}{0.95\textwidth}{p{0.22\textwidth} p{0.13\textwidth} X}
+\toprule
+\textbf{Objetivo} & \textbf{Prioridade} & \textbf{Impacto esperado no projeto} \\
+\midrule
+Manutenibilidade & Alta & Ex.: modularização, baixo acoplamento e testes automatizados. \\
+Segurança & Alta & Ex.: autenticação, autorização e proteção de dados. \\
+Usabilidade & Média & Ex.: consistência da interface e redução de etapas em tarefas frequentes. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+\chapter{Arquitetura do Sistema}
+% ============================================================================
+
+\orientacao{Apresentem a arquitetura proposta e justifiquem as principais
+decisões. O leitor deve conseguir compreender a estrutura geral do sistema
+antes de entrar nos detalhes de seus componentes.}
+
+\section{Contexto e fronteiras do sistema}
+
+\orientacao{Apresentem um diagrama de contexto mostrando o sistema, seus
+principais usuários e os sistemas externos com os quais ele se comunica.
+Expliquem as relações mostradas no diagrama.}
+
+\section{Estilo ou padrão arquitetural}
+
+\orientacao{Identifiquem o(s) estilo(s) ou padrão(ões) arquitetural(is)
+adotado(s), quando aplicável, e justifiquem a escolha considerando as
+características do sistema e seus objetivos de qualidade.}
+
+\section{Contêineres e componentes}
+
+\orientacao{Apresentem uma visão de alto nível da decomposição do sistema.
+Pode-se utilizar, quando adequado, os níveis de contexto, contêiner e
+componente do modelo C4. Não basta inserir os diagramas: descrevam a
+responsabilidade dos elementos relevantes e as principais dependências ou
+comunicações entre eles.}
+
+%\section{Princípios de projeto}
+%
+%\orientacao{Expliquem os princípios de projeto discutidos na disciplina que
+%tiveram impacto efetivo na solução. Em vez de apenas enumerar princípios,
+%indiquem onde eles foram aplicados e que problema de projeto ajudaram a
+%resolver.}
+
+
+\section{Decisões arquiteturais relevantes}
+
+\orientacao{Registrem as decisões que tiveram impacto significativo na
+arquitetura. Para cada decisão, apresentem de forma breve a motivação,
+alternativas consideradas quando pertinente e principais consequências.}
+
+\begin{table}[ht]
+\centering
+\caption{Modelo para registrar decisões arquiteturais.}
+\begin{tabularx}{0.95\textwidth}{p{0.20\textwidth} X X}
+\toprule
+\textbf{Decisão} & \textbf{Motivação} & \textbf{Consequências} \\
+\midrule
+Exemplo & Por que essa alternativa foi escolhida? & Benefícios, limitações ou compromissos envolvidos. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Restrições de arquitetura}
+
+\orientacao{Registrem restrições que limitem as decisões de arquitetura ou
+implementação, como tecnologias obrigatórias, integrações com sistemas
+existentes, ambiente de execução, restrições organizacionais ou convenções.
+Incluam apenas restrições efetivamente relevantes ao projeto.}
+
+% ============================================================================
+\chapter{Projeto de Componentes}
+% ============================================================================
+
+\orientacao{Detalhem a organização interna das partes mais relevantes do
+sistema. O projeto de componentes pode ser representado graficamente,
+textualmente ou por tabelas, de acordo com a natureza da solução.}
+
+\section{Visão geral dos componentes}
+
+\orientacao{Listem os principais componentes e suas responsabilidades. Para
+sistemas maiores, esta visão geral pode cobrir todos os componentes, enquanto
+o detalhamento das seções seguintes pode se concentrar apenas nos mais
+relevantes ou complexos.}
+
+\begin{table}[ht]
+\centering
+\caption{Principais componentes do sistema.}
+\begin{tabularx}{0.95\textwidth}{p{0.28\textwidth} X}
+\toprule
+\textbf{Componente} & \textbf{Responsabilidade principal} \\
+\midrule
+Componente A & Descrever sua responsabilidade principal. \\
+Componente B & Descrever sua responsabilidade principal. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Detalhamento dos componentes principais}
+
+\orientacao{Selecionem os componentes mais relevantes ou complexos e
+apresentem sua estrutura, responsabilidades, interfaces e dependências.
+Se o projeto for orientado a objetos, utilizem principalmente diagramas de
+classes UML e, quando necessário, complementem-nos com diagramas de sequência,
+atividade ou outros artefatos.}
+
+\section{Princípios de projeto}
+
+\orientacao{Expliquem como os princípios de projeto discutidos na disciplina
+	foram aplicados nos principais componentes ou classes do sistema. Por exemplo,
+	podem ser discutidos aspectos relacionados à separação de responsabilidades,
+	coesão, acoplamento, dependência de abstrações e princípios SOLID. Não apenas
+	enumerem os princípios: indiquem onde foram aplicados e qual problema de
+	projeto ajudaram a resolver. Para evidenciar sua aplicação, utilizem, quando
+	adequado, diagramas de classes ou trechos de código-fonte.}
+
+
+\section{Padrões de projeto}
+
+\orientacao{Para cada padrão de projeto efetivamente utilizado, indiquem o
+problema que motivou sua aplicação, as classes ou componentes participantes,
+como o padrão foi aplicado e qual benefício se espera obter. Não utilizem
+padrões apenas para preencher esta seção.}
+
+% ============================================================================
+\chapter{Projeto de Interface do Usuário}
+% ============================================================================
+
+\orientacao{Apresentem as interfaces e os principais fluxos de interação do
+usuário com o sistema. O principal artefato pode ser constituído por
+protótipos de baixa ou alta fidelidade. Diagramas de atividade, fluxos de
+navegação ou outros artefatos podem complementar a explicação.}
+
+Não é necessário apresentar todas as telas. Priorizem as interfaces e os
+fluxos mais importantes para compreender o funcionamento do sistema.
+
+\orientacao{Para cada fluxo principal, expliquem brevemente a tarefa do
+usuário e as decisões de interface relevantes. Se a equipe utilizar uma
+ferramenta externa, como Figma, apresentem exemplos representativos neste
+documento e forneçam o link para o material completo.}
+
+% ============================================================================
+%\chapter{Modelo de Dados}
+%% ============================================================================
+%
+%\orientacao{Documentem as estruturas de dados persistentes fundamentais do
+%sistema e seus relacionamentos. Para bancos relacionais, pode-se utilizar um
+%modelo entidade-relacionamento e/ou esquema relacional. Para outros tipos de
+%persistência, utilizem uma representação adequada à tecnologia adotada.}
+%
+%Além do diagrama, expliquem entidades ou estruturas importantes,
+%relacionamentos, restrições e decisões de modelagem que não sejam evidentes.
+%
+%\orientacao{Se o sistema não utilizar persistência de dados, registrem isso
+%explicitamente e justifiquem brevemente.}
+
+% ============================================================================
+\chapter{Especificação e Estratégia de Testes}
+% ============================================================================
+
+\orientacao{Mostrem como a equipe pretende verificar o comportamento do
+software e reduzir o risco de defeitos. O capítulo deve apresentar uma
+estratégia coerente, e não apenas uma lista de ferramentas.}
+
+\section{Planejamento e níveis de teste}
+
+\orientacao{Indiquem os níveis de teste aplicáveis ao projeto, por exemplo,
+unidade, integração e sistema, e expliquem o objetivo de cada um deles no
+contexto do software.}
+
+\section{Testes de unidade}
+
+\orientacao{Selecionem unidades relevantes e definam cenários e casos de
+teste. Quando existirem dependências externas ou difíceis de controlar,
+expliquem se serão utilizados \textit{stubs}, \textit{mocks} ou outras formas
+de substituição. Apresentem exemplos representativos contendo entradas,
+condições e resultados esperados.}
+
+\section{Testes de integração}
+
+\orientacao{Expliquem como os componentes serão integrados e testados. Quando
+fizer sentido, indiquem a estratégia adotada (por exemplo, \textit{top-down},
+\textit{bottom-up}, \textit{depth-first} ou \textit{breadth-first}) e
+justifiquem-na. Descrevam também como testes de regressão serão utilizados
+após alterações.}
+
+\section{Critérios de conclusão e cobertura}
+
+\orientacao{Definam critérios que permitam decidir quando a atividade de
+teste atingiu um nível satisfatório. A cobertura de código pode ser um dos
+indicadores, mas não deve ser tratada isoladamente como garantia de qualidade.
+Se uma meta quantitativa for adotada, indiquem o tipo de cobertura e
+justifiquem a meta.}
+
+\section{Automação e ferramentas}
+
+\orientacao{Descrevam as ferramentas utilizadas ou planejadas para executar
+testes, gerar relatórios e, quando aplicável, automatizar sua execução.}
+
+% ============================================================================
+%\chapter{Visão de Implantação}
+%% ============================================================================
+%
+%\orientacao{Descrevam a infraestrutura técnica necessária para executar o
+%sistema e o mapeamento dos principais elementos de software para os nós ou
+%ambientes de execução.}
+%
+%Esta seção é especialmente importante para sistemas distribuídos, aplicações
+%Web, sistemas com serviços independentes, contêineres ou integrações externas.
+%
+%\orientacao{Quando adequado, utilizem um diagrama de implantação UML ou outra
+%representação equivalente. Para sistemas simples, uma descrição textual
+%concisa pode ser suficiente.}
+
+% ============================================================================
+\chapter{Gestão de Configuração e Manutenção}
+% ============================================================================
+
+\orientacao{Este capítulo deve mostrar como os artefatos do software são
+versionados, modificados e mantidos de forma controlada. Relacionem as
+práticas descritas ao projeto da equipe, evitando apenas reproduzir
+definições teóricas.}
+
+\section{Repositório e itens de configuração}
+
+\orientacao{Informem o repositório utilizado e identifiquem os principais
+itens de configuração que precisam ser controlados, por exemplo: código-fonte,
+arquivos de configuração, scripts, documentação, modelos de dados e testes.
+%Se o repositório não for público, indiquem como será disponibilizado para avaliação.
+}
+%
+%\section{Estratégia de versionamento}
+%
+%\orientacao{Descrevam de forma objetiva como a equipe organiza \textit{branches},
+%\textit{commits}, \textit{tags} ou \textit{releases}, conforme aplicável.
+%Identifiquem a versão, \textit{tag} ou \textit{commit} correspondente ao
+%software entregue, de modo que seja possível reproduzir exatamente a versão
+%avaliada.}
+
+\section{Gestão de dependências e alterações}
+
+\orientacao{Expliquem como dependências externas são registradas e versionadas
+e como alterações relevantes são controladas. Quando uma alteração afetar
+vários artefatos, indiquem como a equipe mantém a coerência entre código,
+testes, documentação e demais elementos relacionados.}
+
+\section{Rastreabilidade}
+
+\orientacao{Quando aplicável, mostrem como uma alteração pode ser rastreada
+entre os artefatos relacionados, por exemplo: necessidade/requisito, tarefa
+ou \textit{issue}, componente afetado, \textit{commit} e caso de teste.
+Não é necessário criar uma matriz extensa; um ou dois exemplos relevantes
+podem ser suficientes para demonstrar a prática.}
+
+\section{\textit{Build}, integração e entrega}
+
+\orientacao{Descrevam como o software é construído e executado. Se houver
+automação de \textit{build}, testes, integração contínua ou
+entrega/\textit{deploy}, apresentem o fluxo adotado e as ferramentas
+envolvidas. Caso essas práticas não sejam utilizadas, expliquem brevemente
+como o processo é realizado manualmente.}
+
+%\section{Manutenção}
+%
+%\orientacao{Discutam como o projeto facilita futuras alterações. Identifiquem
+%pontos do sistema mais sujeitos a mudanças e expliquem como a arquitetura,
+%a modularização, os testes ou outras decisões adotadas reduzem o impacto
+%dessas mudanças. Quando pertinente, indiquem exemplos de manutenção corretiva,
+%adaptativa, perfectiva ou preventiva esperados para o sistema.}
+
+%% ============================================================================
+%\chapter{Glossário e Siglas}
+%% ============================================================================
+%
+%\orientacao{Incluam apenas termos, siglas ou abreviações cuja explicação seja
+%necessária para a compreensão do documento. Excluam este capítulo se ele não
+%for necessário.}
+%
+%\begin{table}[ht]
+%\centering
+%\caption{Exemplo de glossário e siglas.}
+%\begin{tabularx}{0.90\textwidth}{p{0.25\textwidth} X}
+%\toprule
+%\textbf{Termo/Sigla} & \textbf{Descrição} \\
+%\midrule
+%API & \textit{Application Programming Interface}. \\
+%UML & \textit{Unified Modeling Language}. \\
+%\bottomrule
+%\end{tabularx}
+%\end{table}
+
+% ============================================================================
+\chapter*{Controle de Versões do Documento}
+% ============================================================================
+
+\orientacao{Registrem apenas alterações significativas nesta documentação.
+Este controle se refere ao documento; o versionamento do software deve ser
+descrito no capítulo de Gestão de Configuração e Manutenção.}
+
+\begin{table}[ht]
+\centering
+\caption{Histórico de versões do documento.}
+\begin{tabularx}{0.95\textwidth}{p{0.21\textwidth} p{0.19\textwidth} p{0.12\textwidth} X}
+\toprule
+\textbf{Data} & \textbf{Autor(es)} & \textbf{Versão} & \textbf{Alteração} \\
+\midrule
+DD/MM/AAAA & Equipe & 1.0 & Versão inicial para entrega. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+% APÊNDICES OPCIONAIS
+% ============================================================================
+% Caso seja necessário incluir a especificação detalhada de requisitos,
+% casos de teste completos ou outros materiais extensos, pode-se utilizar:
+%
+% \appendix
+% \chapter{Especificação Detalhada de Requisitos}
+% ...
+%
+% \chapter{Casos de Teste}
+% ...
+
+% ============================================================================
+% REFERÊNCIAS
+% ============================================================================
+% Se a equipe utilizar um arquivo refs.bib, ele será incluído automaticamente.
+% Caso contrário, esta parte é ignorada.
+\IfFileExists{refs.bib}{
+    \clearpage
+    \renewcommand{\bibname}{Referências bibliográficas}
+    \bibliography{refs}
+    \bibliographystyle{plainnat}
+}{}
+
+\end{document}
