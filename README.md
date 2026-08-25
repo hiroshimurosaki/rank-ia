@@ -26,12 +26,7 @@ rank-ia/
 │   ├── images/
 │   └── template-original.pdf   # PDF de referência do template
 ├── apresentacoes/    # Slides e pitch do RANK-IA (semestres 4 e 5)
-├── documentos/       # PDF do projeto final, documento de ES2 e nota do projeto
-└── material-aula/    # Material da disciplina ES2
-    ├── slides/           # Slides teóricos das aulas
-    ├── exemplos/         # Exemplos de código vistos em aula
-    ├── exercicios/       # Exercícios (ex.: padrão Decorador)
-    └── scraper/          # Script de extração de slides + saída
+└── documentos/       # PDF do projeto final, documento de ES2 e nota do projeto
 ```
 
 ## Compilar a documentação
