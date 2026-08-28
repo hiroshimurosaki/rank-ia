@@ -568,7 +568,7 @@ documento e forneçam o link para o material completo.}
 %explicitamente e justifiquem brevemente.}
 
 % ============================================================================
-\chapter{Especificação e Estratégia de Testes}
+\chapter{Especificação e Estratégia de Testes}\label{cha:testes}
 % ============================================================================
 
 \orientacao{Mostrem como a equipe pretende verificar o comportamento do
@@ -626,13 +626,32 @@ testes, gerar relatórios e, quando aplicável, automatizar sua execução.}
 %concisa pode ser suficiente.}
 
 % ============================================================================
-\chapter{Gestão de Configuração e Manutenção}
+\chapter{Gestão de Configuração e Manutenção}\label{cha:configuracao}
 % ============================================================================
 
 \orientacao{Este capítulo deve mostrar como os artefatos do software são
 versionados, modificados e mantidos de forma controlada. Relacionem as
 práticas descritas ao projeto da equipe, evitando apenas reproduzir
 definições teóricas.}
+
+O RANK-IA é desenvolvido por uma equipe pequena, distribuída entre partes
+distintas do sistema, e entregue em ciclos de duas semanas a uma organização
+que depende dele para formar suas equipes de trabalho. Essa combinação define
+o que a gestão de configuração precisa garantir. Primeiro, que qualquer versão
+já entregue possa ser reconstruída exatamente como foi publicada, porque é
+assim que se investiga um problema relatado por um gestor sem depender do que
+alguém lembra ter feito. Segundo, que toda alteração no software esteja ligada
+à necessidade que a motivou. E terceiro, que o conhecimento sobre como o
+sistema é construído esteja registrado, e não apenas na cabeça de quem escreveu
+cada parte, porque a substituição do modelo de IA prevista pelo RNF07 e o
+objetivo de manutenibilidade da Seção~\ref{sec:quality-goals} pressupõem que
+outra pessoa consiga mexer naquele código depois.
+
+Duas ferramentas sustentam esse controle. O \textbf{GitHub} hospeda o
+repositório, as revisões de código, a documentação de apoio e as automações. O
+\textbf{Taiga.io}, já adotado pela equipe como quadro Scrumban, organiza o
+trabalho. A ligação entre as duas é o que fecha a cadeia de rastreabilidade
+descrita na Seção~\ref{sec:rastreabilidade}.
 
 \section{Repositório e itens de configuração}
 
@@ -641,14 +660,165 @@ itens de configuração que precisam ser controlados, por exemplo: código-fonte
 arquivos de configuração, scripts, documentação, modelos de dados e testes.
 %Se o repositório não for público, indiquem como será disponibilizado para avaliação.
 }
-%
-%\section{Estratégia de versionamento}
-%
-%\orientacao{Descrevam de forma objetiva como a equipe organiza \textit{branches},
-%\textit{commits}, \textit{tags} ou \textit{releases}, conforme aplicável.
-%Identifiquem a versão, \textit{tag} ou \textit{commit} correspondente ao
-%software entregue, de modo que seja possível reproduzir exatamente a versão
-%avaliada.}
+
+O controle de versões é feito com \textbf{Git}, em repositório único
+(\textit{monorepo}) hospedado no GitHub em
+\url{https://github.com/hiroshimurosaki/rank-ia}. A alternativa seria um
+repositório por contêiner, mas isso não se justifica aqui: com uma equipe deste
+tamanho, é comum que uma única funcionalidade atravesse o \textit{frontend}, a
+API e o serviço de IA, e manter essa alteração em um só \textit{commit} evita
+que as partes do sistema entrem em versões incompatíveis entre si. O custo
+típico do \textit{monorepo}, que é acoplar ciclos de entrega que deveriam ser
+independentes, só aparece em produtos bem maiores que este.
+
+O GitHub foi escolhido pela familiaridade da equipe e por três facilidades
+concretas: revisão de código por \textit{pull request} com o histórico
+preservado, execução das automações no próprio GitHub Actions sem
+infraestrutura extra, e integração nativa com o Taiga.io, que a equipe já usava
+desde a disciplina anterior.
+
+A Tabela~\ref{tab:itens-config} identifica os itens de configuração sob
+controle.
+
+\begin{table}[ht]
+\centering
+\caption{Itens de configuração do RANK-IA.}
+\label{tab:itens-config}
+\begin{tabularx}{0.95\textwidth}{p{0.26\textwidth} X}
+\toprule
+\textbf{Item} & \textbf{Conteúdo e observações} \\
+\midrule
+Código-fonte da aplicação & \textit{Frontend} React/TypeScript, API Node.js/%
+TypeScript e os dois serviços em Python (Engine de IA e leitor de currículos). \\
+Comentários e documentação interna & Comentários no código e anotações de
+interface fazem parte do código-fonte e são revisados junto com ele. \\
+Testes automatizados & Testes de unidade e de integração, versionados junto ao
+código que exercitam. Um \textit{commit} que altera comportamento e não toca em
+teste algum é sinalizado na revisão. \\
+Esquema do banco de dados & Arquivos de migração versionados e imutáveis após a
+integração: corrigir uma migração já aplicada exige uma nova migração, nunca a
+edição da anterior. \\
+Descritores de dependências & \texttt{package.json} e \texttt{package-lock.json}
+nos projetos Node, \texttt{requirements.txt} com versões fixadas nos serviços
+Python. \\
+Configuração de ambiente & \texttt{docker-compose.yml}, \texttt{Dockerfile} de
+cada serviço e \texttt{.env.example} com a lista de variáveis exigidas, sem
+valores. \\
+Automações & Fluxos de trabalho do GitHub Actions em
+\texttt{.github/workflows/} e os \textit{scripts} auxiliares invocados por eles. \\
+Documentação de projeto & Este documento (fonte \LaTeX, \texttt{refs.bib} e
+imagens), \texttt{README.md} e os diagramas C4 e UML em formato editável, e não
+apenas exportados como imagem. \\
+Wiki do projeto & Guia de uso do sistema e guia de contribuição, versionados no
+repositório de wiki do GitHub. \\
+Parametrização do modelo de IA & Critérios de formação, hiperparâmetros e
+identificador da versão do modelo em uso, em arquivo de configuração
+versionado. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Documentação em três camadas}
+
+A equipe trata documentação como um item de configuração em três níveis, cada
+um respondendo a uma pergunta diferente e mantido em um lugar diferente.
+
+Este documento responde \textbf{por que} o sistema é como é. Ele registra as
+decisões de arquitetura e de projeto e as razões por trás delas, e muda pouco,
+apenas quando uma decisão relevante é tomada ou revista.
+
+Os \textbf{comentários no código} respondem por que um trecho específico faz o
+que faz. A convenção adotada é deliberadamente restritiva: comentário que
+apenas repete em português o que a linha ao lado já diz é ruído, envelhece mal
+e acaba mentindo. Comenta-se o que o código não consegue dizer sozinho, como a
+razão de uma regra de negócio pouco óbvia, o motivo de uma solução de contorno,
+ou a fórmula por trás do Coeficiente de Aproveitamento. Além disso, toda
+interface pública recebe anotação estruturada, TSDoc no código TypeScript e
+\textit{docstring} nos serviços Python, descrevendo o contrato: o que cada
+parâmetro significa, o que é devolvido e em que condições o método falha. É
+essa camada que faz uma abstração como \texttt{IIAGeradoraService} ser
+utilizável por quem não escreveu a implementação por trás dela.
+
+A \textbf{wiki do projeto}, hospedada no próprio GitHub, responde \textbf{como}
+fazer as coisas, e é a camada que mais muda. Ela tem duas partes. A primeira é
+o guia de uso, escrito para o gestor de RH: como cadastrar colaboradores,
+importar currículos, solicitar a formação de uma equipe, interpretar o
+Coeficiente de Aproveitamento e ajustar uma composição sugerida. A segunda é o
+guia de contribuição, escrito para quem vai programar, e cobre as convenções já
+estabelecidas no projeto:
+
+\begin{itemize}[nosep]
+    \item como preparar o ambiente local e executar o sistema;
+    \item a organização dos módulos e a regra de coesão que a orienta, de modo
+    que código novo seja colocado onde os demais desenvolvedores esperam
+    encontrá-lo;
+    \item as convenções de nomenclatura e de estilo, e como executar as
+    ferramentas de análise estática antes de abrir um \textit{pull request};
+    \item quando criar uma abstração e como declarar dependências por
+    interface, seguindo o que foi decidido no Capítulo~\ref{cha:componentes};
+    \item o padrão de mensagem de \textit{commit} e o fluxo de \textit{branches};
+    \item receitas para as tarefas recorrentes, como criar uma migração de
+    banco, adicionar um endpoint na API ou escrever um teste com \textit{mock}
+    de uma interface.
+\end{itemize}
+
+A razão de existir dessa segunda parte é prática. Boa parte do padrão do
+projeto não está escrita em lugar nenhum: mora no código já existente, e quem
+chega depois só o descobre por imitação ou por comentário em revisão de código.
+Escrever o padrão reduz o tempo que um novo integrante leva para produzir
+código consistente com o resto e diminui a quantidade de discussão repetida nas
+revisões, que passam a se concentrar na lógica em vez da forma.
+
+\subsection*{O que fica fora do repositório}
+
+Três categorias de artefato são deliberadamente mantidas fora do controle de
+versão. Os \textbf{segredos}, como senhas de banco, chaves de API e o segredo de
+assinatura dos \textit{tokens} JWT, são substituídos pelo \texttt{.env.example}
+e fornecidos em tempo de execução por variáveis de ambiente. Os
+\textbf{artefatos gerados}, como \texttt{node\_modules}, \textit{bundles} do
+\textit{frontend} e imagens de contêiner, são reconstrutíveis a partir do que
+está versionado e só ocupariam espaço e poluiriam o histórico.
+
+A terceira categoria é a mais importante neste sistema. Currículos,
+competências e histórico de desempenho são \textbf{dados pessoais de
+colaboradores} e, pelo RNF02, não podem sair do ambiente do cliente nem
+circular pelo repositório. Os ambientes de desenvolvimento e de homologação são
+populados por um \textit{script} de carga com dados sintéticos, esse sim
+versionado, e nenhuma cópia da base de produção é usada para depuração.
+
+Os pesos do modelo de IA treinado também não vão para o Git, por serem arquivos
+binários grandes e ilegíveis em \textit{diff}. O que fica versionado é o
+\textit{script} de treinamento, a configuração usada e o identificador da
+versão do modelo; o arquivo de pesos correspondente é publicado como anexo de
+uma \textit{release}. Assim continua sendo possível dizer, para qualquer versão
+do software em uso, qual modelo ela estava executando.
+
+\subsection*{Organização de \textit{branches} e versões}
+
+A equipe trabalha com \textit{branches} curtos sobre a \textit{branch}
+principal. A \texttt{main} contém apenas código integrado e aprovado pela
+verificação automatizada, e está protegida contra \textit{push} direto: toda
+alteração entra por \textit{pull request}. Cada tarefa do quadro Scrumban dá
+origem a um \textit{branch} nomeado como
+\texttt{tipo/TG-<ref>-descricao-curta}, em que \texttt{tipo} é
+\texttt{feature}, \texttt{fix} ou \texttt{docs} e \texttt{<ref>} é o
+identificador da história ou tarefa no Taiga.
+
+Fluxos mais elaborados, com um \textit{branch} de desenvolvimento permanente
+separado do de produção, foram considerados. Eles fazem sentido quando várias
+versões do produto precisam ser mantidas simultaneamente, o que não é o caso do
+RANK-IA: existe uma versão em produção por vez, e correções urgentes seguem o
+mesmo caminho das demais alterações, apenas com prioridade maior na fila de
+revisão. Adotar o fluxo mais complexo acrescentaria uma etapa de sincronização
+sem benefício correspondente.
+
+Ao final de cada \textit{sprint}, a \texttt{main} recebe uma \textit{tag}
+anotada seguindo versionamento semântico (\texttt{v0.1.0},
+\texttt{v0.2.0} e assim por diante), e é essa \textit{tag} que identifica o que
+foi entregue ao cliente. Recuperar o estado exato de uma versão publicada é,
+portanto, uma operação de um comando, o que importa tanto para reproduzir um
+defeito relatado quanto para retornar rapidamente à versão anterior se uma
+entrega apresentar problema.
 
 \section{Gestão de dependências e alterações}
 
@@ -657,13 +827,135 @@ e como alterações relevantes são controladas. Quando uma alteração afetar
 vários artefatos, indiquem como a equipe mantém a coerência entre código,
 testes, documentação e demais elementos relacionados.}
 
-\section{Rastreabilidade}
+As dependências externas são fixadas por arquivo de trava. Nos projetos
+Node.js, o \texttt{package-lock.json} é versionado e a instalação nas
+automações usa \texttt{npm ci}, que instala exatamente as versões travadas e
+falha se o \texttt{package.json} e o \texttt{package-lock.json} estiverem
+divergentes. Nos serviços Python, o \texttt{requirements.txt} registra versões
+exatas, e não faixas. O resultado é que a construção do software é
+determinística: dois integrantes que constroem o mesmo \textit{commit} em
+máquinas diferentes obtêm o mesmo conjunto de bibliotecas, e o que roda em
+produção é o que foi testado.
+
+A atualização dessas dependências fica a cargo do Dependabot, configurado para
+abrir um \textit{pull request} semanal por dependência desatualizada. Cada um
+desses \textit{pull requests} passa pela mesma verificação automatizada que uma
+alteração escrita pela equipe. Uma atualização que quebre os testes aparece
+isolada, em um \textit{pull request} próprio, em vez de ser descoberta no meio
+do desenvolvimento de outra funcionalidade.
+
+O controle de alterações se apoia inteiramente no \textit{pull request}. Nenhum
+código chega à \texttt{main} sem passar por um, e cada um exige a aprovação de
+ao menos um integrante que não seja o autor. O modelo de \textit{pull request}
+do repositório (\texttt{.github/pull\_request\_template.md}) traz uma lista de
+verificação curta, cujos itens são o que a equipe usa como \textit{Definition of
+Done}:
+
+\begin{itemize}[nosep]
+    \item a alteração referencia a história ou tarefa correspondente no Taiga;
+    \item testes automatizados cobrem o comportamento novo ou alterado;
+    \item se um contrato entre componentes mudou, os comentários de interface e
+    a documentação correspondente foram atualizados no mesmo \textit{pull
+    request};
+    \item se o esquema do banco mudou, existe uma migração acompanhando a
+    alteração;
+    \item se a alteração muda ou cria uma convenção do projeto, a wiki foi
+    atualizada;
+    \item a verificação automatizada está aprovada.
+\end{itemize}
+
+Os três itens do meio são a resposta da equipe ao problema da coerência entre
+artefatos. A alteração mais representativa nesse sentido é justamente a
+prevista pelo RNF07: substituir o algoritmo de formação de equipes. Uma mudança
+dessas atinge, ao mesmo tempo, a implementação do serviço de IA, o contrato da
+interface \texttt{IIAGeradoraService} e a documentação desse contrato, os
+\textit{mocks} usados pelos testes de unidade do
+\texttt{GerenciadorDeEquipes}, a configuração de hiperparâmetros e a descrição
+do componente neste documento. A regra é que esses artefatos viajam juntos: um
+\textit{pull request} que altere a interface sem atualizar os testes e a
+documentação não é aprovado. É uma regra barata de seguir e é o que impede que a
+documentação se descole do código ao longo do tempo, que é a forma como
+documentação costuma morrer.
+
+\section{Rastreabilidade}\label{sec:rastreabilidade}
 
 \orientacao{Quando aplicável, mostrem como uma alteração pode ser rastreada
 entre os artefatos relacionados, por exemplo: necessidade/requisito, tarefa
 ou \textit{issue}, componente afetado, \textit{commit} e caso de teste.
 Não é necessário criar uma matriz extensa; um ou dois exemplos relevantes
 podem ser suficientes para demonstrar a prática.}
+
+O planejamento do trabalho acontece no Taiga.io, onde ficam o \textit{backlog},
+as histórias de usuário, as tarefas e o quadro Kanban com as colunas
+\textit{Novo}, \textit{Em Andamento}, \textit{Pronto para teste},
+\textit{Fechado} e \textit{Precisa de informação}. O código, as revisões e as
+automações ficam no GitHub. Manter as duas ferramentas desconectadas criaria
+duas fontes de verdade que divergem em poucas semanas, e a equipe evita isso
+com a integração de controle de versão do Taiga, configurada por
+\textit{webhook} no repositório.
+
+A ligação se dá pela mensagem de \textit{commit}. Toda mensagem cita a
+referência do item no Taiga no formato \texttt{TG-<ref>}, e o Taiga passa a
+exibir aquele \textit{commit} no histórico da história ou tarefa
+correspondente. A mesma referência aparece no nome do \textit{branch} e no
+título do \textit{pull request}, de modo que a simples leitura do histórico do
+Git já revela a que necessidade cada alteração atende. As \textit{issues} do
+GitHub são usadas para o que nasce fora do planejamento da \textit{sprint},
+tipicamente defeitos encontrados em revisão, em teste ou relatados por um
+usuário, e são espelhadas como \textit{issues} no Taiga para que o quadro
+continue refletindo todo o trabalho em andamento, e não apenas o que foi
+planejado.
+
+Uma limitação já observada pela equipe merece registro: o Taiga gera os
+identificadores de histórias e tarefas de forma sequencial e automática, sem
+permitir que a equipe os defina, e por isso a numeração da plataforma não
+coincide com a usada nas primeiras atividades de modelagem. A referência
+adotada como oficial para efeito de rastreabilidade é a do Taiga, e é ela que
+aparece nas mensagens de \textit{commit}.
+
+A cadeia completa, portanto, é:
+
+\begin{center}
+requisito $\rightarrow$ história de usuário $\rightarrow$ tarefa $\rightarrow$
+\textit{branch} $\rightarrow$ \textit{commits} $\rightarrow$ \textit{pull
+request} $\rightarrow$ componente $\rightarrow$ caso de teste
+\end{center}
+
+A Tabela~\ref{tab:rastreabilidade} percorre essa cadeia em dois exemplos. Não
+se pretende construir uma matriz exaustiva; a intenção é mostrar que o caminho
+existe e é percorrível nos dois sentidos, tanto do requisito até o teste que o
+verifica quanto de um \textit{commit} qualquer de volta até a necessidade que o
+originou.
+
+\begin{table}[ht]
+\centering
+\caption{Exemplos de rastreabilidade entre artefatos.}
+\label{tab:rastreabilidade}
+\begin{tabularx}{0.95\textwidth}{p{0.20\textwidth} X X}
+\toprule
+\textbf{Artefato} & \textbf{Exemplo 1} & \textbf{Exemplo 2} \\
+\midrule
+Requisito & RF04 --- troca manual de membros com registro de
+\textit{feedback} & RNF01 --- senhas armazenadas de forma criptografada \\
+História / \textit{issue} & História \textit{Troca manual de membros}
+(\textit{Sprint} 1) & \textit{Issue} aberta na revisão de segurança, espelhada
+no Taiga \\
+Tarefa & Criação da função de troca manual; criação da interface da troca &
+Substituição do armazenamento da senha por \textit{hash} \textit{bcrypt} \\
+\textit{Branch} & \texttt{feature/TG-14-troca-manual} &
+\texttt{fix/TG-57-hash-senha} \\
+Mensagem de \textit{commit} & \texttt{TG-14 registra ajuste manual como
+feedback do modelo} & \texttt{TG-57 aplica bcrypt no cadastro e na
+autenticação} \\
+Componente afetado & \texttt{GerenciadorDeEquipes},
+\texttt{HistoricoAjustes} e a tela de ajuste & Serviço de autenticação e
+migração da tabela de usuários \\
+Caso de teste & Ajuste manual altera a composição e persiste o registro de
+\textit{feedback} & Senha não é recuperável a partir do valor armazenado;
+autenticação valida o \textit{hash} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{\textit{Build}, integração e entrega}
 
@@ -672,6 +964,144 @@ automação de \textit{build}, testes, integração contínua ou
 entrega/\textit{deploy}, apresentem o fluxo adotado e as ferramentas
 envolvidas. Caso essas práticas não sejam utilizadas, expliquem brevemente
 como o processo é realizado manualmente.}
+
+\subsection*{Construção local}
+
+O sistema é composto por quatro processos e um banco de dados, cada um com suas
+próprias exigências de versão de tempo de execução, de bibliotecas nativas e de
+configuração. Montar esse ambiente manualmente é demorado, mas o problema maior
+não é o tempo: é que cada integrante acabaria com uma combinação ligeiramente
+diferente de versões de Node.js, de Python e de PostgreSQL, além das
+particularidades do próprio sistema operacional. Basta uma dessas diferenças
+para que um defeito apareça na máquina de um desenvolvedor e não na do outro, e
+o esforço passa a ser gasto investigando o ambiente em vez do software.
+
+\textbf{É exatamente esse risco que o uso do Docker elimina.} Ao descrever cada
+serviço em um \texttt{Dockerfile} e a composição entre eles no
+\texttt{docker-compose.yml}, o ambiente de execução deixa de ser uma
+característica da máquina de quem programa e passa a ser um item de
+configuração versionado como qualquer outro. Todos os integrantes executam as
+mesmas versões, com as mesmas dependências de sistema, independentemente de
+estarem em Linux, Windows ou macOS, e um único comando levanta o
+\textit{frontend}, a API, os dois serviços Python e a instância do PostgreSQL.
+Na primeira execução, um \textit{script} aplica as migrações e carrega a base
+sintética de colaboradores. O passo a passo detalhado fica na wiki, e não neste
+documento, porque é o tipo de informação que muda com frequência.
+
+A garantia não para no ambiente local. Como a esteira de integração contínua e
+os ambientes de homologação e produção executam essas mesmas imagens, a
+uniformidade se estende por todo o caminho: um comportamento observado na
+máquina de um integrante é reproduzível na verificação automatizada e no
+servidor que atende o cliente. O clássico \textit{funciona na minha máquina}
+deixa de ser um argumento possível, porque a máquina é a mesma em todos os
+pontos do processo.
+
+A mesma base de código é construída de duas formas diferentes, conforme o
+objetivo. Não são dois softwares, e sim duas configurações de construção:
+
+\begin{itemize}[nosep]
+    \item \textbf{Desenvolvimento} --- prioriza o tempo de retorno. O código
+    não é minificado, os \textit{source maps} são preservados, o servidor
+    recarrega automaticamente a cada alteração, o nível de registro é detalhado
+    e a base é populada com dados sintéticos.
+    \item \textbf{Produção} --- prioriza desempenho e segurança. O
+    \textit{frontend} é compilado e minificado em arquivos estáticos, o
+    TypeScript é transpilado antecipadamente, as dependências de
+    desenvolvimento ficam fora da imagem final, o registro detalhado é
+    desligado para não expor dados de colaboradores e as migrações são
+    aplicadas de forma controlada antes de a nova versão entrar no ar.
+\end{itemize}
+
+Em nenhum dos casos há configuração específica de ambiente escrita no código. O
+que muda são variáveis de ambiente, de modo que a mesma imagem verificada pela
+automação é a que roda para o cliente.
+
+\subsection*{Integração contínua}
+
+A verificação automatizada roda no GitHub Actions e é acionada em duas
+situações: a cada \textit{push} em um \textit{branch} de trabalho e a cada
+\textit{pull request} aberto ou atualizado para a \texttt{main}. A
+Tabela~\ref{tab:ci} descreve os trabalhos que compõem a esteira.
+
+\begin{table}[ht]
+\centering
+\caption{Verificações automatizadas executadas pela integração contínua.}
+\label{tab:ci}
+\begin{tabularx}{0.95\textwidth}{p{0.18\textwidth} p{0.20\textwidth} X}
+\toprule
+\textbf{Verificação} & \textbf{Quando executa} & \textbf{O que valida} \\
+\midrule
+Padrão de \textit{commit} & \textit{Pull request} & A mensagem segue o padrão
+adotado e contém a referência \texttt{TG-<ref>}, sem a qual a rastreabilidade
+da Seção~\ref{sec:rastreabilidade} se perde. \\
+Análise estática & \textit{Push} e \textit{pull request} & ESLint e Prettier
+nos projetos TypeScript, Ruff nos serviços Python. Falha em erro de formatação
+ou de estilo, o que mantém a parte mecânica do padrão de código fora da
+discussão na revisão. \\
+Compilação & \textit{Push} e \textit{pull request} & O TypeScript compila sem
+erros de tipo e as imagens de contêiner são construídas com sucesso. \\
+Testes de unidade & \textit{Push} e \textit{pull request} & Executa a suíte de
+unidade e publica o relatório de cobertura como comentário no \textit{pull
+request}. \\
+Testes de integração & \textit{Pull request} para a \texttt{main} & Sobe um
+PostgreSQL como serviço da esteira e executa os testes que atravessam API,
+repositórios e banco. \\
+Documentação & Alterações em \texttt{projeto/} & Compila este documento com
+\texttt{latexmk} e falha se houver erro de \LaTeX{} ou referência indefinida. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A \texttt{main} exige que todas essas verificações estejam aprovadas e que haja
+ao menos uma aprovação humana antes da integração. Com isso ela permanece
+sempre em estado construível, e qualquer integrante pode partir dela para uma
+nova tarefa sem antes precisar descobrir se está quebrada, o que importa em uma
+equipe que trabalha de forma assíncrona e em horários distintos.
+
+Vale destacar a divisão de trabalho entre a esteira e a revisão humana. A
+análise estática cobre a parte mecânica do padrão de código, que é formatação,
+nomenclatura e regras de estilo, e por isso essa parte não precisa mais ser
+discutida nos comentários de revisão. O que a ferramenta não consegue julgar,
+como se a abstração criada é a certa, se o comentário explica o que precisava
+ser explicado e se a alteração respeita a organização de módulos descrita na
+wiki, fica com o revisor. É essa divisão que mantém a revisão de código focada
+em decisões de projeto.
+
+\subsection*{Ambientes e entrega}
+
+O software passa por três ambientes até chegar ao usuário. O de
+\textbf{desenvolvimento} é a máquina de cada integrante, levantada pelo
+\texttt{docker-compose}. O de \textbf{homologação} é uma réplica do ambiente de
+produção, com a mesma configuração de construção e uma base de dados sintética;
+toda integração na \texttt{main} é implantada nele automaticamente, e é ali que
+a equipe e o responsável pelo produto validam o incremento antes da liberação.
+O de \textbf{produção} atende os usuários da organização cliente.
+
+A entrega para produção é acionada pela criação de uma \textit{tag} de versão,
+ao final da \textit{sprint} e após o aceite em homologação. O fluxo de
+\textit{release} constrói as imagens em modo de produção, executa a suíte
+completa de testes, publica uma \textit{release} no GitHub com as notas da
+versão e o PDF desta documentação, aplica as migrações pendentes e sobe a nova
+versão.
+
+O objetivo de confiabilidade definido na Seção~\ref{sec:quality-goals} tem
+consequência direta sobre esse último passo. Como o sistema precisa permanecer
+disponível durante o horário comercial, a subida é feita de forma gradual, com
+as instâncias sendo substituídas uma a uma, e só é considerada concluída depois
+que a nova versão responde corretamente à verificação de saúde. Migrações são
+escritas de modo a manter compatibilidade com a versão anterior durante a
+transição, o que permite reverter para a \textit{tag} anterior sem perder
+dados caso algum problema apareça logo após a liberação. A implantação em si
+depende de uma aprovação explícita na esteira: a equipe automatizou a execução,
+mas manteve a decisão de liberar como um ato humano e consciente.
+
+O que essa automação entrega, no fim, é confiança para entregar com frequência.
+A equipe consegue publicar uma versão a cada duas semanas sabendo que o que
+está na \texttt{main} compila, passa nos testes, mantém o vínculo com o item de
+trabalho que o originou e pode ser revertido em minutos. Sem isso, o custo de
+cada entrega cresce, a frequência cai e o software passa a mudar mais devagar
+do que a organização que depende dele.
+
 
 %\section{Manutenção}
 %
