@@ -144,11 +144,80 @@ complexos ou representativos.
 neste capítulo. O objetivo é permitir que um leitor compreenda o problema e o
 escopo antes de examinar as decisões de projeto.}
 
+O RANK-IA é uma aplicação web corporativa que apoia a formação de equipes de
+trabalho dentro de uma organização. A partir das habilidades, competências e
+lacunas de formação (\textit{gaps}) registradas para cada colaborador, o sistema
+utiliza um modelo de Inteligência Artificial para sugerir composições de equipe e
+associa a cada sugestão um \textbf{Coeficiente de Aproveitamento}, que estima o
+desempenho esperado do grupo. Como a formação de equipes envolve fatores humanos
+que nem sempre são mensuráveis, as sugestões podem ser ajustadas manualmente pelo
+gestor, e esses ajustes são registrados e devolvidos ao modelo como
+retroalimentação. O produto é, portanto, deliberadamente híbrido: automação
+assistida por supervisão humana, e não decisão automática.
+
+Este capítulo delimita o problema tratado, o escopo do sistema, os requisitos mais
+relevantes para compreendê-lo e os atributos de qualidade que orientam as decisões
+de projeto apresentadas nos capítulos seguintes. A especificação detalhada de
+requisitos, os casos de uso e os diagramas de análise foram produzidos na etapa
+anterior do projeto e são aqui referenciados de forma resumida, sem repetição
+integral.
+
 \section{Contexto do software}
 
 \orientacao{Contextualizem o problema do ponto de vista dos usuários e da
 atividade que o software deve apoiar, automatizar ou melhorar. Identifiquem os
 principais usuários ou partes interessadas quando isso for relevante.}
+
+Na maioria das organizações, a montagem de equipes para um projeto ou tarefa é
+uma atividade manual e pouco sistematizada. O profissional de Recursos Humanos ou
+o gestor responsável precisa cruzar currículos, planilhas de competências,
+histórico de projetos anteriores e conhecimento tácito sobre o perfil de cada
+pessoa. Esse processo apresenta três limitações recorrentes:
+
+\begin{itemize}[nosep]
+    \item \textbf{Custo de tempo.} A informação necessária está dispersa em
+    documentos de formatos distintos, e o esforço de consolidá-la cresce
+    rapidamente com o número de colaboradores considerados.
+    \item \textbf{Subjetividade.} Sem um critério explícito, a escolha depende
+    fortemente da familiaridade do gestor com os candidatos, o que tende a
+    favorecer sempre os mesmos perfis e a deixar competências pouco visíveis fora
+    das composições.
+    \item \textbf{Ausência de rastreabilidade.} Não fica registrado por que uma
+    determinada equipe foi formada, o que dificulta revisar a decisão, comparar
+    alternativas e aprender com os resultados obtidos.
+\end{itemize}
+
+O RANK-IA atua exatamente sobre essa atividade. Ele centraliza os dados de
+competências dos colaboradores, torna explícito o critério de composição por meio
+do Coeficiente de Aproveitamento, e mantém o histórico das equipes geradas e dos
+ajustes manuais realizados. Um efeito secundário relevante é que as lacunas
+identificadas durante a análise passam a alimentar sugestões de treinamento,
+ligando a formação de equipes ao desenvolvimento profissional dos colaboradores.
+
+As principais partes interessadas do sistema estão descritas na
+Tabela~\ref{tab:stakeholders}.
+
+\begin{table}[ht]
+\centering
+\caption{Partes interessadas do RANK-IA.}
+\label{tab:stakeholders}
+\begin{tabularx}{0.95\textwidth}{p{0.24\textwidth} p{0.16\textwidth} X}
+\toprule
+\textbf{Parte interessada} & \textbf{Tipo} & \textbf{Interesse no sistema} \\
+\midrule
+Gestor / RH & Usuário primário & Cadastrar colaboradores, parametrizar os
+critérios da IA, solicitar e validar equipes, acompanhar relatórios. Possui
+acesso total ao sistema. \\
+Colaborador & Usuário secundário & Consultar as próprias competências e
+\textit{gaps}, acompanhar treinamentos sugeridos e visualizar as equipes das
+quais participa. Possui acesso restrito aos seus próprios dados. \\
+Organização & Patrocinador & Reduzir o tempo de montagem de equipes, aumentar a
+produtividade dos times e manter a operação em conformidade com a LGPD. \\
+Equipe de desenvolvimento & Executor & Evoluir o modelo de IA e os módulos do
+sistema sem regressões, com apoio de testes automatizados. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Escopo}
 
@@ -156,12 +225,130 @@ principais usuários ou partes interessadas quando isso for relevante.}
 está explicitamente fora do escopo. Evitem transformar esta seção em uma
 especificação detalhada de requisitos.}
 
+O escopo do RANK-IA compreende o ciclo completo da formação de uma equipe, desde
+o registro das competências dos colaboradores até o acompanhamento dos resultados
+da equipe formada. Fazem parte do sistema:
+
+\begin{itemize}[nosep]
+    \item \textbf{Gerenciamento de colaboradores} --- cadastro manual por
+    formulário ou importação assistida a partir de currículos em PDF, com
+    extração automática de habilidades e experiências.
+    \item \textbf{Geração de equipes por IA} --- composição automática a partir
+    dos critérios informados pelo gestor (tamanho da equipe, habilidades
+    exigidas, peso da experiência), com cálculo do Coeficiente de Aproveitamento
+    para cada sugestão.
+    \item \textbf{Ajuste manual com retroalimentação} --- interface para
+    substituir, incluir ou remover membros de uma sugestão; cada alteração é
+    registrada e utilizada como \textit{feedback} para o modelo.
+    \item \textbf{Relatórios e indicadores} --- visualização gráfica da qualidade
+    das equipes e relatórios de desempenho individual e coletivo.
+    \item \textbf{Sugestão de treinamentos} --- recomendação de capacitações
+    associadas às lacunas identificadas no perfil dos colaboradores.
+    \item \textbf{Controle de acesso por perfil} --- autenticação e autorização
+    diferenciadas para os perfis Gestor/RH e Colaborador, com tratamento dos
+    dados pessoais conforme a LGPD.
+\end{itemize}
+
+Estão explicitamente \textbf{fora do escopo} deste projeto:
+
+\begin{itemize}[nosep]
+    \item Processos de RH não relacionados à composição de equipes, como folha de
+    pagamento, controle de ponto, recrutamento externo e avaliação de desempenho
+    formal.
+    \item Gestão de projetos e de tarefas: o sistema forma a equipe, mas não
+    acompanha a execução do trabalho que ela realiza.
+    \item Integração com sistemas de RH ou ERP de terceiros, prevista apenas por
+    meio da exportação de relatórios em formatos abertos.
+    \item Aplicativo móvel nativo; o acesso se dá por navegador, com interface
+    responsiva.
+    \item Qualquer decisão automática de contratação, promoção ou desligamento. O
+    sistema é uma ferramenta de apoio à decisão, e a validação humana é sempre
+    obrigatória.
+\end{itemize}
+
 \section{Visão geral dos requisitos}
 
 \orientacao{Apresentem os requisitos funcionais e não funcionais mais
 importantes para compreender o projeto. Caso a equipe tenha uma especificação
 detalhada de requisitos produzida anteriormente, ela pode ser incluída em um
 apêndice ou referenciada neste documento.}
+
+A especificação detalhada de requisitos, incluindo regras de negócio, casos de
+uso e histórias de usuário, foi elaborada na disciplina anterior e permanece
+válida como documento de referência. Esta seção reúne apenas os requisitos que
+influenciam diretamente as decisões de projeto discutidas neste documento.
+
+A Tabela~\ref{tab:rf} apresenta os requisitos funcionais essenciais.
+
+\begin{table}[ht]
+\centering
+\caption{Requisitos funcionais essenciais.}
+\label{tab:rf}
+\begin{tabularx}{0.95\textwidth}{p{0.08\textwidth} X}
+\toprule
+\textbf{ID} & \textbf{Descrição} \\
+\midrule
+RF01 & O sistema deve coletar e armazenar informações relevantes sobre os
+colaboradores, como habilidades, experiências, histórico de desempenho e
+lacunas de formação. \\
+RF02 & O sistema deve gerar automaticamente equipes balanceadas a partir dos
+atributos dos colaboradores e dos critérios definidos pelo gestor. \\
+RF03 & O sistema deve calcular e exibir o Coeficiente de Aproveitamento de cada
+equipe sugerida, permitindo a comparação entre composições alternativas. \\
+RF04 & O sistema deve permitir a troca manual de membros nas equipes sugeridas e
+registrar cada ajuste como \textit{feedback} para o modelo de IA. \\
+RF05 & O sistema deve identificar as lacunas de cada colaborador e sugerir
+treinamentos correspondentes. \\
+RF06 & O sistema deve gerar relatórios de desempenho individual e coletivo e
+apresentar a qualidade das equipes de forma gráfica. \\
+RF07 & O sistema deve restringir o acesso às funcionalidades conforme o perfil do
+usuário (Gestor/RH ou Colaborador). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Os requisitos não funcionais mais determinantes para a arquitetura estão
+resumidos na Tabela~\ref{tab:rnf}, acompanhados da métrica adotada para
+verificá-los.
+
+\begin{table}[ht]
+\centering
+\caption{Requisitos não funcionais determinantes para o projeto.}
+\label{tab:rnf}
+\begin{tabularx}{0.95\textwidth}{p{0.08\textwidth} p{0.30\textwidth} X}
+\toprule
+\textbf{ID} & \textbf{Descrição} & \textbf{Métrica de verificação} \\
+\midrule
+RNF01 & As senhas dos usuários devem ser armazenadas de forma criptografada. &
+Uso de algoritmo de \textit{hash} forte (\textit{bcrypt}); nenhuma senha em
+texto claro na base de dados. \\
+RNF02 & O tratamento de dados pessoais deve seguir a LGPD. & Ausência de
+vulnerabilidades de severidade alta ou crítica em teste de intrusão; acesso aos
+dados restrito por perfil. \\
+RNF03 & O sistema deve responder à solicitação de formação de equipe em tempo
+adequado. & Mais de 90\% das equipes formadas dentro do tempo esperado,
+independentemente do tamanho do time. \\
+RNF04 & O sistema deve suportar aumento de carga de usuários simultâneos. &
+Tempo médio de resposta $\leq$ 2 s e taxa de erro $\leq$ 1\% em teste de carga
+com 50.000 conexões simultâneas. \\
+RNF05 & A interface deve ser utilizável por gestores sem treinamento
+especializado. & Pontuação superior a 70 na escala SUS e ajuste manual de equipe
+realizável em até três cliques. \\
+RNF06 & O sistema deve funcionar nos principais navegadores e resoluções de
+tela. & Renderização correta em Chrome, Firefox e Edge, e em resoluções a partir
+de 1024 px, sem instalação de \textit{plugins}. \\
+RNF07 & O modelo de IA deve poder ser retreinado e substituído sem alteração da
+lógica de negócio. & Troca da implementação do serviço de IA sem modificar as
+classes de negócio, validada por testes com \textit{mocks}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Vale destacar o RNF07: ele não decorre de uma exigência do cliente, mas da
+natureza experimental do componente de IA. Como o modelo será ajustado
+repetidamente ao longo da vida do sistema, tratá-lo como uma dependência
+substituível é uma decisão que atravessa toda a arquitetura descrita no
+Capítulo~\ref{cha:arquitetura}.
 
 \section{Objetivos de qualidade}\label{sec:quality-goals}
 
@@ -171,24 +358,70 @@ confiabilidade, usabilidade ou portabilidade. Podem ser utilizados modelos
 como ISO/IEC 25010 ou FURPS+, desde que apenas os atributos relevantes ao
 sistema sejam selecionados.}
 
-Uma forma de sintetizar os objetivos e suas implicações é:
+Os objetivos de qualidade do RANK-IA foram definidos a partir do modelo de
+qualidade de produto da norma ISO/IEC 25010~\citep{iso25010}, cujas
+características estão ilustradas na Figura~\ref{fig:iso25010}. Das oito
+características previstas pela norma, foram selecionadas apenas aquelas que
+efetivamente restringem as decisões de projeto; as demais foram consideradas
+satisfeitas pelas práticas usuais de desenvolvimento web e não são discutidas
+neste documento.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{01_2_iso-25010-topics-EN.drawio.png}
+\caption{Características do modelo de qualidade de produto da ISO/IEC 25010.}
+\label{fig:iso25010}
+\end{figure}
+
+A Tabela~\ref{tab:quality-goals} sintetiza os objetivos priorizados e o que cada
+um implica concretamente no projeto do sistema.
 
 \begin{table}[ht]
 \centering
-\caption{Exemplo de objetivos de qualidade.}
+\caption{Objetivos de qualidade do RANK-IA.}
+\label{tab:quality-goals}
 \begin{tabularx}{0.95\textwidth}{p{0.22\textwidth} p{0.13\textwidth} X}
 \toprule
 \textbf{Objetivo} & \textbf{Prioridade} & \textbf{Impacto esperado no projeto} \\
 \midrule
-Manutenibilidade & Alta & Ex.: modularização, baixo acoplamento e testes automatizados. \\
-Segurança & Alta & Ex.: autenticação, autorização e proteção de dados. \\
-Usabilidade & Média & Ex.: consistência da interface e redução de etapas em tarefas frequentes. \\
+Manutenibilidade & Alta & Modularização por coesão em torno do domínio de
+equipes, dependências expressas por interfaces (inversão de dependência) e
+testes automatizados. É o que torna viável substituir o modelo de IA sem
+reescrever a lógica de negócio. \\
+Adequação funcional & Alta & A qualidade da sugestão é o valor central do
+produto: o Coeficiente de Aproveitamento precisa ser calculado de forma correta e
+explicável, e a sugestão deve ser aproveitável sem que o gestor a descarte por
+completo. \\
+Segurança & Alta & Autenticação, autorização por perfil, criptografia de senhas e
+das comunicações, e segregação dos dados pessoais dos colaboradores em
+conformidade com a LGPD. \\
+Confiabilidade & Alta & Persistência garantida das equipes salvas e dos ajustes
+manuais, com versionamento das composições para auditoria; para uma mesma
+entrada e um mesmo modelo, a sugestão deve ser reprodutível. \\
+Usabilidade & Média & Interface consistente, ajuste manual em poucas etapas e
+apresentação gráfica dos indicadores, de modo que o gestor compreenda a
+composição sugerida sem conhecimento técnico sobre o modelo. \\
+Eficiência de desempenho & Média & Separação do processamento da IA em serviço
+próprio, evitando que o custo da inferência degrade as demais operações da
+aplicação. \\
+Portabilidade e compatibilidade & Baixa & Aplicação web responsiva, sem
+dependência de \textit{plugins}, e leitura e exportação em formatos abertos
+(PDF, CSV). \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+Os dois primeiros objetivos merecem uma observação, porque tensionam entre si. A
+adequação funcional pressiona a equipe a experimentar com o modelo de IA, o que
+tende a gerar código acoplado ao algoritmo do momento; a manutenibilidade exige o
+contrário. A escolha do projeto foi privilegiar a manutenibilidade na fronteira
+entre o domínio e a IA --- isolando o modelo atrás de uma abstração --- de modo
+que a experimentação fique contida em um único componente substituível. As
+consequências dessa decisão são detalhadas no
+Capítulo~\ref{cha:arquitetura} e no Capítulo~\ref{cha:componentes}.
+
 % ============================================================================
-\chapter{Arquitetura do Sistema}
+\chapter{Arquitetura do Sistema}\label{cha:arquitetura}
 % ============================================================================
 
 \orientacao{Apresentem a arquitetura proposta e justifiquem as principais
@@ -249,7 +482,7 @@ existentes, ambiente de execução, restrições organizacionais ou convenções
 Incluam apenas restrições efetivamente relevantes ao projeto.}
 
 % ============================================================================
-\chapter{Projeto de Componentes}
+\chapter{Projeto de Componentes}\label{cha:componentes}
 % ============================================================================
 
 \orientacao{Detalhem a organização interna das partes mais relevantes do
