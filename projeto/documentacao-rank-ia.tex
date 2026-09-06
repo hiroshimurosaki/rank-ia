@@ -149,21 +149,19 @@ escopo antes de examinar as decisões de projeto.}
 
 O RANK-IA é uma aplicação web corporativa que apoia a formação de equipes de
 trabalho dentro de uma organização. A partir das habilidades, competências e
-lacunas de formação (\textit{gaps}) registradas para cada colaborador, o sistema
-utiliza um modelo de Inteligência Artificial para sugerir composições de equipe e
-associa a cada sugestão um \textbf{Coeficiente de Aproveitamento}, que estima o
-desempenho esperado do grupo. Como a formação de equipes envolve fatores humanos
-que nem sempre são mensuráveis, as sugestões podem ser ajustadas manualmente pelo
-gestor, e esses ajustes são registrados e devolvidos ao modelo como
-retroalimentação. O produto é, portanto, deliberadamente híbrido: automação
-assistida por supervisão humana, e não decisão automática.
+lacunas de formação (\textit{gaps}) de cada colaborador, um modelo de
+Inteligência Artificial sugere composições de equipe e associa a cada uma um
+\textbf{Coeficiente de Aproveitamento}, que estima o desempenho esperado do
+grupo. Como a formação de equipes envolve fatores humanos nem sempre
+mensuráveis, o gestor pode ajustar as sugestões manualmente, e esses ajustes
+retroalimentam o modelo: automação assistida por supervisão humana, não decisão
+automática.
 
-Este capítulo delimita o problema tratado, o escopo do sistema, os requisitos mais
-relevantes para compreendê-lo e os atributos de qualidade que orientam as decisões
-de projeto apresentadas nos capítulos seguintes. A especificação detalhada de
-requisitos, os casos de uso e os diagramas de análise foram produzidos na etapa
-anterior do projeto e são aqui referenciados de forma resumida, sem repetição
-integral.
+Este capítulo delimita o problema, o escopo, os requisitos mais relevantes e os
+atributos de qualidade que orientam as decisões dos capítulos seguintes; a
+especificação detalhada de requisitos, os casos de uso e os diagramas de
+análise, produzidos na etapa anterior do projeto, são aqui apenas
+referenciados, sem repetição integral.
 
 \section{Contexto do software}
 
@@ -171,11 +169,11 @@ integral.
 atividade que o software deve apoiar, automatizar ou melhorar. Identifiquem os
 principais usuários ou partes interessadas quando isso for relevante.}
 
-Na maioria das organizações, a montagem de equipes para um projeto ou tarefa é
-uma atividade manual e pouco sistematizada. O profissional de Recursos Humanos ou
-o gestor responsável precisa cruzar currículos, planilhas de competências,
-histórico de projetos anteriores e conhecimento tácito sobre o perfil de cada
-pessoa. Esse processo apresenta três limitações recorrentes:
+Na maioria das organizações, a montagem de equipes é uma atividade manual e
+pouco sistematizada: o profissional de RH ou o gestor precisa cruzar
+currículos, planilhas de competências, histórico de projetos anteriores e
+conhecimento tácito sobre cada pessoa. Esse processo apresenta três
+limitações recorrentes:
 
 \begin{itemize}[nosep]
     \item \textbf{Custo de tempo.} A informação necessária está dispersa em
@@ -190,12 +188,12 @@ pessoa. Esse processo apresenta três limitações recorrentes:
     alternativas e aprender com os resultados obtidos.
 \end{itemize}
 
-O RANK-IA atua exatamente sobre essa atividade. Ele centraliza os dados de
-competências dos colaboradores, torna explícito o critério de composição por meio
-do Coeficiente de Aproveitamento, e mantém o histórico das equipes geradas e dos
-ajustes manuais realizados. Um efeito secundário relevante é que as lacunas
-identificadas durante a análise passam a alimentar sugestões de treinamento,
-ligando a formação de equipes ao desenvolvimento profissional dos colaboradores.
+O RANK-IA atua exatamente sobre essa atividade: centraliza os dados de
+competências, torna explícito o critério de composição pelo Coeficiente de
+Aproveitamento e mantém o histórico das equipes geradas e dos ajustes manuais.
+Um efeito secundário é que as lacunas identificadas passam a alimentar
+sugestões de treinamento, ligando a formação de equipes ao desenvolvimento
+profissional dos colaboradores.
 
 As principais partes interessadas do sistema estão descritas na
 Tabela~\ref{tab:stakeholders}.
@@ -347,19 +345,18 @@ classes de negócio, validada por testes com \textit{mocks}. \\
 \end{tabularx}
 \end{table}
 
-Vale destacar o RNF07: ele não decorre de uma exigência do cliente, mas da
-natureza experimental do componente de IA. Como o modelo será ajustado
-repetidamente ao longo da vida do sistema, tratá-lo como uma dependência
-substituível é uma decisão que atravessa toda a arquitetura descrita no
-Capítulo~\ref{cha:arquitetura}.
+Vale destacar o RNF07, que não decorre de exigência do cliente, mas da natureza
+experimental do componente de IA: como o modelo será ajustado repetidamente ao
+longo da vida do sistema, tratá-lo como dependência substituível é uma decisão
+que atravessa toda a arquitetura descrita no Capítulo~\ref{cha:arquitetura}.
 
 \section{Regras de negócio}
 
 Além dos requisitos, um conjunto de regras de negócio restringe o
-comportamento do sistema: definem quando uma ação é permitida, o que é
-obrigatório registrar e como o sistema deve reagir diante de dados
-incompletos. Essas regras foram levantadas na etapa anterior do projeto e
-permanecem válidas; a Tabela~\ref{tab:regras-negocio} as resume.
+comportamento do sistema, definindo quando uma ação é permitida, o que deve
+ser registrado e como reagir a dados incompletos; levantadas na etapa
+anterior do projeto, permanecem válidas e são resumidas na
+Tabela~\ref{tab:regras-negocio}.
 
 \begin{table}[ht]
 \centering
@@ -392,11 +389,10 @@ processo. \\
 \end{tabularx}
 \end{table}
 
-RN02 e RN07 merecem destaque porque são as regras que mais diretamente
-geram casos de teste: a primeira define a condição de contorno que separa
-um colaborador elegível de um inelegível para a geração automática, e a
-segunda exige que o sistema nunca sobrescreva uma composição anterior sem
-deixar rastro. Ambas reaparecem como critério de aceite no
+RN02 e RN07 merecem destaque por gerarem diretamente casos de teste: a
+primeira define a condição de contorno entre colaborador elegível e
+inelegível, e a segunda exige que o sistema nunca sobrescreva uma composição
+anterior sem deixar rastro; ambas reaparecem como critério de aceite no
 Capítulo~\ref{cha:testes}.
 
 \FloatBarrier
@@ -410,12 +406,11 @@ como ISO/IEC 25010 ou FURPS+, desde que apenas os atributos relevantes ao
 sistema sejam selecionados.}
 
 Os objetivos de qualidade do RANK-IA foram definidos a partir do modelo de
-qualidade de produto da norma ISO/IEC 25010~\citep{iso25010}, cujas
-características estão ilustradas na Figura~\ref{fig:iso25010}. Das oito
-características previstas pela norma, foram selecionadas apenas aquelas que
-efetivamente restringem as decisões de projeto; as demais foram consideradas
-satisfeitas pelas práticas usuais de desenvolvimento web e não são discutidas
-neste documento.
+qualidade de produto da norma ISO/IEC 25010~\citep{iso25010}
+(Figura~\ref{fig:iso25010}): das oito características previstas, foram
+selecionadas apenas as que efetivamente restringem as decisões de projeto, e
+as demais foram consideradas satisfeitas pelas práticas usuais de
+desenvolvimento web, sem discussão neste documento.
 
 \begin{figure}[ht]
 \centering
@@ -514,25 +509,25 @@ dependência de \textit{plugins}, e leitura e exportação em formatos abertos
 \end{tabularx}
 \end{table}
 
-Dois desses objetivos ainda carecem de uma meta numérica explícita neste
-documento. Confiabilidade é medida, no plano de qualidade da equipe, por uma
-disponibilidade de serviço (\textit{uptime}) de 99,5\% durante o horário
+Confiabilidade e Compatibilidade ainda carecem de meta numérica explícita
+neste documento: a primeira é medida, no plano de qualidade da equipe, por
+uma disponibilidade de serviço (\textit{uptime}) de 99,5\% durante o horário
 comercial e por um MTBF (tempo médio entre falhas) superior a 720 horas de
-operação contínua. Compatibilidade é medida por uma taxa de sucesso de 99\%
-na leitura de currículos em PDF gerados por diferentes versões de editor,
-dado que a extração de currículos é o ponto do sistema mais exposto a
-variação no formato de entrada. Essas duas metas, somadas às já registradas
-nas Tabelas~\ref{tab:rnf} e \ref{tab:quality-goals}, são o que o
-Capítulo~\ref{cha:testes} usa como critério de aceite para os testes de
-sistema e de compatibilidade.
+operação contínua; a segunda, por uma taxa de sucesso de 99\% na leitura de
+currículos em PDF gerados por diferentes versões de editor, já que a
+extração de currículos é o ponto do sistema mais exposto a variação no
+formato de entrada. Essas metas, somadas às já registradas nas
+Tabelas~\ref{tab:rnf} e \ref{tab:quality-goals}, são o critério de aceite que
+o Capítulo~\ref{cha:testes} usa para os testes de sistema e de
+compatibilidade.
 
-Os dois primeiros objetivos merecem uma observação, porque tensionam entre si. A
-adequação funcional pressiona a equipe a experimentar com o modelo de IA, o que
-tende a gerar código acoplado ao algoritmo do momento; a manutenibilidade exige o
-contrário. A escolha do projeto foi privilegiar a manutenibilidade na fronteira
-entre o domínio e a IA --- isolando o modelo atrás de uma abstração --- de
-modo que a experimentação fique contida em um único componente substituível. As
-consequências dessa decisão são detalhadas no
+Os dois primeiros objetivos tensionam entre si: a adequação funcional
+pressiona a equipe a experimentar com o modelo de IA, gerando código
+acoplado ao algoritmo do momento, enquanto a manutenibilidade exige o
+contrário. A escolha do projeto foi privilegiar a manutenibilidade na
+fronteira entre o domínio e a IA --- isolando o modelo atrás de uma
+abstração --- de modo que a experimentação fique contida em um único
+componente substituível, com consequências detalhadas no
 Capítulo~\ref{cha:arquitetura} e no Capítulo~\ref{cha:componentes}.
 
 % ============================================================================
@@ -724,10 +719,10 @@ serviços de IA e com o banco, sem que o comportamento correto de um dependa
 de uma suposição errada sobre o outro.
 
 Entre esses dois níveis, o projeto adota também um nível de \textbf{teste de
-contrato}. O RNF07 promete que o modelo de IA pode ser substituído sem
-alterar a lógica de negócio; o que precisa ser validado, então, não é uma
-implementação específica, e sim o contrato da interface
-\texttt{IIAGeradoraService} em si: a mesma bateria de testes deve passar
+contrato}: como o RNF07 promete que o modelo de IA pode ser substituído sem
+alterar a lógica de negócio, o que precisa ser validado não é uma
+implementação específica, mas o contrato da interface
+\texttt{IIAGeradoraService} em si, cuja mesma bateria de testes deve passar
 independentemente de qual serviço a implementa no momento. Sem esse nível, a
 promessa do RNF07 fica só na intenção, porque nada garante que uma troca de
 implementação não quebre silenciosamente uma suposição que só existia na
@@ -760,11 +755,11 @@ geração automática (RN02), o controle de acesso por perfil (RN04) e o
 registro de uma nova versão de equipe (RN07). Dependências externas ao
 módulo testado --- o módulo de IA, o serviço de e-mail, o banco --- são
 substituídas por \textit{mocks} que respeitam as interfaces já definidas
-(\texttt{IIAGeradoraService}, \texttt{INotificadorService}), o que só é
-possível porque essas dependências foram isoladas atrás de abstrações desde
-o projeto de componentes; é o pagamento concreto da decisão de manutenibilidade
-discutida no Capítulo~\ref{cha:componentes}. A Tabela~\ref{tab:testes-unidade}
-apresenta exemplos representativos.
+(\texttt{IIAGeradoraService}, \texttt{INotificadorService}), possível porque
+essas dependências foram isoladas atrás de abstrações desde o projeto de
+componentes (o pagamento concreto da manutenibilidade do
+Capítulo~\ref{cha:componentes}), como mostra a
+Tabela~\ref{tab:testes-unidade}.
 
 \begin{table}[ht]
 \centering
@@ -807,8 +802,8 @@ do código de produção, falha por não existir implementação, e só então �
 escrito o código mínimo necessário para passar, seguido de refatoração. A
 adoção não é ampla: código de integração com os serviços de IA e telas de
 interface continuam sendo testados depois de escritos, porque o custo de
-simular a resposta da IA antes mesmo de decidir o formato da integração
-seria maior que o benefício. TDD fica reservado à lógica de domínio, que é
+simular a resposta da IA antes de decidir o formato da integração seria
+maior que o benefício, e TDD fica reservado à lógica de domínio ---
 justamente onde escrever o teste primeiro força o desenho a ser testável e
 desacoplado, pagando na prática o objetivo de manutenibilidade do
 Capítulo~\ref{cha:arquitetura}.
@@ -869,18 +864,17 @@ o RF ou a RN descrevem''; quando os dois divergem, quem está certo é o
 requisito.
 
 A aceitação segue o mesmo desenho de dois ambientes já descrito no
-Capítulo~\ref{cha:configuracao}. O ambiente de homologação cumpre o papel do
-que a literatura de teste chama de teste alfa: a cada integração na
-\texttt{main}, a equipe (e, quando disponível, um representante do RH que
-participou do levantamento de requisitos na etapa anterior do projeto)
-usa o incremento nesse ambiente antes da liberação, sob observação direta de
-quem desenvolveu, o que permite registrar tanto falhas quanto dificuldades
-de uso que não chegam a configurar um defeito. Um teste beta formal,
-conduzido sem a presença da equipe em instalações do cliente, não se aplica
-a este projeto: o RANK-IA ainda não tem uma organização cliente em produção,
-e a validação com usuário externo, fora do ambiente controlado da equipe,
-fica registrada aqui como prática a adotar assim que houver uma organização
-piloto, e não como algo já executado.
+Capítulo~\ref{cha:configuracao}: o ambiente de homologação cumpre o papel do
+que a literatura de teste chama de teste alfa, pois a cada integração na
+\texttt{main} a equipe (e, quando disponível, um representante do RH que
+participou do levantamento de requisitos) usa o incremento nesse ambiente
+antes da liberação, sob observação direta de quem desenvolveu, registrando
+tanto falhas quanto dificuldades de uso que não chegam a configurar um
+defeito. Um teste beta formal, conduzido sem a presença da equipe em
+instalações do cliente, não se aplica ainda a este projeto: o RANK-IA não
+tem organização cliente em produção, e a validação com usuário externo fica
+registrada aqui como prática a adotar assim que houver uma organização
+piloto, não como algo já executado.
 
 \section{Teste de sistema}\label{sec:teste-sistema}
 
@@ -950,11 +944,10 @@ equivalente para código de interface, onde cobertura alta tende a testar o
 \textit{framework} em vez da lógica da equipe. Segundo, rastreabilidade: todo
 requisito funcional da Tabela~\ref{tab:rf} tem ao menos um teste de validação
 associado (Seção~\ref{sec:validacao}), e toda regra de negócio da
-Tabela~\ref{tab:regras-negocio} tem ao
-menos um teste de unidade ou integração associado. Essa exigência
-estende, para o nível de teste, a mesma cadeia de rastreabilidade descrita
-na Seção~\ref{sec:rastreabilidade}, que hoje termina no caso de teste sem
-detalhar o que isso significa. Terceiro, metas quantitativas: cada meta
+Tabela~\ref{tab:regras-negocio} tem ao menos um teste de unidade ou
+integração associado, estendendo para o nível de teste a mesma cadeia de
+rastreabilidade da Seção~\ref{sec:rastreabilidade}, que hoje termina no caso
+de teste sem detalhar o que isso significa. Terceiro, metas quantitativas: cada meta
 numérica de RNF ou de objetivo de qualidade (Tabelas~\ref{tab:rnf} e
 \ref{tab:quality-goals}) tem um teste de sistema correspondente, descrito na
 Seção~\ref{sec:teste-sistema}, que a exercita de forma direta.
@@ -997,49 +990,40 @@ precise ser depurado duas vezes.
 \orientacao{Descrevam as ferramentas utilizadas ou planejadas para executar
 testes, gerar relatórios e, quando aplicável, automatizar sua execução.}
 
-A Tabela~\ref{tab:ferramentas-teste} resume as ferramentas planejadas por
-nível de teste.
+As ferramentas planejadas por nível de teste são:
 
-\begin{table}[ht]
-\centering
-\caption{Ferramentas planejadas por nível de teste.}
-\label{tab:ferramentas-teste}
-\begin{tabularx}{0.95\textwidth}{p{0.26\textwidth} X}
-\toprule
-\textbf{Nível} & \textbf{Ferramentas} \\
-\midrule
-Unidade (\textit{frontend}/API) & Vitest e React Testing Library no
-\textit{frontend}; Vitest e \textit{mocks} manuais das interfaces de domínio
-na API. \\
-Unidade (serviços Python) & pytest; Hypothesis para os testes baseados em
-propriedades do cálculo do CA. \\
-Integração & Supertest contra a API, com PostgreSQL efêmero subido pela
-esteira (Tabela~\ref{tab:ci}); \textit{stubs} dos serviços de IA para os
-cenários de falha que seriam caros de reproduzir de verdade (ex.\ currículo
-corrompido). \\
-Contrato & Verificação de esquema (JSON Schema) da entrada e saída de
-\texttt{IIAGeradoraService} e \texttt{INotificadorService}, executada contra
-qualquer implementação candidata antes de ela substituir a atual. \\
-Sistema / aceitação & Playwright, cobrindo os fluxos principais e
-alternativos de UC-01, UC-02 e UC-03 em navegador real. \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\begin{itemize}[nosep]
+    \item \textbf{Unidade (\textit{frontend}/API)}: Vitest e React Testing
+    Library no \textit{frontend}; Vitest e \textit{mocks} manuais das
+    interfaces de domínio na API.
+    \item \textbf{Unidade (serviços Python)}: pytest; Hypothesis para os
+    testes baseados em propriedades do cálculo do CA.
+    \item \textbf{Integração}: Supertest contra a API, com PostgreSQL
+    efêmero subido pela esteira (Tabela~\ref{tab:ci}); \textit{stubs} dos
+    serviços de IA para os cenários de falha que seriam caros de reproduzir
+    de verdade (ex.\ currículo corrompido).
+    \item \textbf{Contrato}: verificação de esquema (JSON Schema) da entrada
+    e saída de \texttt{IIAGeradoraService} e \texttt{INotificadorService},
+    executada contra qualquer implementação candidata antes de ela
+    substituir a atual.
+    \item \textbf{Sistema / aceitação}: Playwright, cobrindo os fluxos
+    principais e alternativos de UC-01, UC-02 e UC-03 em navegador real.
+\end{itemize}
 
 Além dos níveis clássicos, um \textit{script} agendado cobre o que é
 específico do componente de IA e não se encaixa nas categorias tradicionais
 de teste de sistema da Seção~\ref{sec:teste-sistema}: depois de cada
 re-treinamento semanal da IA (História RIA-03), ele compara a distribuição
-de CA gerada pelo modelo novo contra a do modelo anterior para o mesmo
-conjunto de colaboradores de teste, e alerta se a mudança ultrapassar um
-limiar. O objetivo é pegar uma regressão de qualidade antes que ela afete
-equipes reais. O mesmo \textit{script} gera equipes variando apenas um
-atributo pessoal do colaborador (mantendo habilidades e desempenho
-idênticos) e verifica se o CA muda. A Seção de Escopo do Capítulo 1 já deixa
-qualquer decisão automática de contratação, promoção ou desligamento fora do
-sistema; este teste é a contrapartida técnica dessa decisão: ele não decide
-se um viés existe, mas garante que, se existir, ele seja visível antes de
-chegar ao gestor.
+de CA gerada pelo modelo novo contra a do anterior para o mesmo conjunto de
+colaboradores de teste e alerta se a mudança ultrapassar um limiar, pegando
+uma regressão de qualidade antes que ela afete equipes reais. O mesmo
+\textit{script} gera equipes variando apenas um atributo pessoal do
+colaborador (mantendo habilidades e desempenho idênticos) e verifica se o CA
+muda: como a Seção de Escopo do Capítulo 1 já deixa qualquer decisão
+automática de contratação, promoção ou desligamento fora do sistema, este
+teste é a contrapartida técnica dessa decisão, não decidindo se um viés
+existe, mas garantindo que, se existir, seja visível antes de chegar ao
+gestor.
 
 Por fim, os relatórios de teste seguem o mesmo princípio de rastreabilidade
 do Capítulo~\ref{cha:configuracao}: o relatório de cobertura é publicado
@@ -1076,22 +1060,23 @@ definições teóricas.}
 
 O RANK-IA é desenvolvido por uma equipe pequena, distribuída entre partes
 distintas do sistema, e entregue em ciclos de duas semanas a uma organização
-que depende dele para formar suas equipes de trabalho. Essa combinação define
-o que a gestão de configuração precisa garantir. Primeiro, que qualquer versão
-já entregue possa ser reconstruída exatamente como foi publicada, porque é
-assim que se investiga um problema relatado por um gestor sem depender do que
-alguém lembra ter feito. Segundo, que toda alteração no software esteja ligada
-à necessidade que a motivou. E terceiro, que o conhecimento sobre como o
-sistema é construído esteja registrado, e não apenas na cabeça de quem escreveu
-cada parte, porque a substituição do modelo de IA prevista pelo RNF07 e o
-objetivo de manutenibilidade da Seção~\ref{sec:quality-goals} pressupõem que
-outra pessoa consiga mexer naquele código depois.
+que depende dele para formar suas equipes de trabalho. Essa combinação exige
+três garantias da gestão de configuração: que qualquer versão já entregue
+possa ser reconstruída exatamente como foi publicada, para investigar um
+problema relatado por um gestor sem depender do que alguém lembra ter feito;
+que toda alteração esteja ligada à necessidade que a motivou; e que o
+conhecimento sobre como o sistema é construído esteja registrado, não apenas
+na cabeça de quem escreveu cada parte, já que a substituição do modelo de IA
+prevista pelo RNF07 e o objetivo de manutenibilidade da
+Seção~\ref{sec:quality-goals} pressupõem que outra pessoa consiga mexer
+nesse código depois.
 
-Duas ferramentas sustentam esse controle. O \textbf{GitHub} hospeda o
-repositório, as revisões de código, a documentação de apoio e as automações. O
-\textbf{Taiga.io}, já adotado pela equipe como quadro Scrumban, organiza o
-trabalho e hospeda a wiki do projeto. A ligação entre as duas é o que fecha a
-cadeia de rastreabilidade descrita na Seção~\ref{sec:rastreabilidade}.
+Duas ferramentas sustentam esse controle: o \textbf{GitHub} hospeda o
+repositório, as revisões de código, a documentação de apoio e as automações,
+e o \textbf{Taiga.io}, já adotado pela equipe como quadro Scrumban, organiza
+o trabalho e hospeda a wiki do projeto. A ligação entre as duas é o que
+fecha a cadeia de rastreabilidade descrita na
+Seção~\ref{sec:rastreabilidade}.
 
 \section{Repositório e itens de configuração}
 
@@ -1104,12 +1089,13 @@ arquivos de configuração, scripts, documentação, modelos de dados e testes.
 O controle de versões é feito com \textbf{Git}, em repositório único
 (\textit{monorepo}) hospedado no GitHub em
 \url{https://github.com/hiroshimurosaki/rank-ia}. A alternativa seria um
-repositório por contêiner, mas isso não se justifica aqui: com uma equipe deste
-tamanho, é comum que uma única funcionalidade atravesse o \textit{frontend}, a
-API e o serviço de IA, e manter essa alteração em um só \textit{commit} evita
-que as partes do sistema entrem em versões incompatíveis entre si. O custo
-típico do \textit{monorepo}, que é acoplar ciclos de entrega que deveriam ser
-independentes, só aparece em produtos bem maiores que este.
+repositório por contêiner, mas isso não se justifica aqui: com uma equipe
+deste tamanho, é comum que uma única funcionalidade atravesse o
+\textit{frontend}, a API e o serviço de IA, e manter essa alteração em um só
+\textit{commit} evita que as partes do sistema entrem em versões
+incompatíveis entre si --- o custo típico do \textit{monorepo}, acoplar
+ciclos de entrega que deveriam ser independentes, só aparece em produtos bem
+maiores que este.
 
 O GitHub foi escolhido pela familiaridade da equipe e por três facilidades
 concretas: revisão de código por \textit{pull request} com o histórico
@@ -1163,29 +1149,30 @@ versionado. \\
 A equipe trata documentação como um item de configuração em três níveis, cada
 um respondendo a uma pergunta diferente e mantido em um lugar diferente.
 
-Este documento responde \textbf{por que} o sistema é como é. Ele registra as
-decisões de arquitetura e de projeto e as razões por trás delas, e muda pouco,
-apenas quando uma decisão relevante é tomada ou revista.
+Este documento responde \textbf{por que} o sistema é como é: registra as
+decisões de arquitetura e de projeto e as razões por trás delas, e muda
+pouco, apenas quando uma decisão relevante é tomada ou revista.
 
-Os \textbf{comentários no código} respondem por que um trecho específico faz o
-que faz. A convenção adotada é deliberadamente restritiva: comentário que
-apenas repete em português o que a linha ao lado já diz é ruído, envelhece mal
-e acaba mentindo. Comenta-se o que o código não consegue dizer sozinho, como a
-razão de uma regra de negócio pouco óbvia, o motivo de uma solução de contorno,
-ou a fórmula por trás do Coeficiente de Aproveitamento. Além disso, toda
-interface pública recebe anotação estruturada, TSDoc no código TypeScript e
-\textit{docstring} nos serviços Python, descrevendo o contrato: o que cada
-parâmetro significa, o que é devolvido e em que condições o método falha. É
-essa camada que faz uma abstração como \texttt{IIAGeradoraService} ser
-utilizável por quem não escreveu a implementação por trás dela.
+Os \textbf{comentários no código} respondem por que um trecho específico faz
+o que faz, seguindo uma convenção deliberadamente restritiva: comentário que
+apenas repete em português o que a linha ao lado já diz é ruído, envelhece
+mal e acaba mentindo, então só se comenta o que o código não consegue dizer
+sozinho, como a razão de uma regra de negócio pouco óbvia, o motivo de uma
+solução de contorno ou a fórmula por trás do Coeficiente de Aproveitamento.
+Além disso, toda interface pública recebe anotação estruturada (TSDoc no
+código TypeScript, \textit{docstring} nos serviços Python) descrevendo o
+contrato --- o que cada parâmetro significa, o que é devolvido e em que
+condições o método falha ---, o que torna uma abstração como
+\texttt{IIAGeradoraService} utilizável por quem não escreveu a implementação
+por trás dela.
 
-A \textbf{wiki do projeto}, hospedada no próprio Taiga.io, responde \textbf{como}
-fazer as coisas, e é a camada que mais muda. Ela tem duas partes. A primeira é
-o guia de uso, escrito para o gestor de RH: como cadastrar colaboradores,
-importar currículos, solicitar a formação de uma equipe, interpretar o
-Coeficiente de Aproveitamento e ajustar uma composição sugerida. A segunda é o
-guia de contribuição, escrito para quem vai programar, e cobre as convenções já
-estabelecidas no projeto:
+A \textbf{wiki do projeto}, hospedada no próprio Taiga.io, responde
+\textbf{como} fazer as coisas, e é a camada que mais muda, com duas partes:
+a primeira é o guia de uso, escrito para o gestor de RH --- como cadastrar
+colaboradores, importar currículos, solicitar a formação de uma equipe,
+interpretar o Coeficiente de Aproveitamento e ajustar uma composição
+sugerida ---, e a segunda é o guia de contribuição, escrito para quem vai
+programar, cobrindo as convenções já estabelecidas no projeto:
 
 \begin{itemize}[nosep]
     \item como preparar o ambiente local e executar o sistema;
@@ -1202,36 +1189,39 @@ estabelecidas no projeto:
     de uma interface.
 \end{itemize}
 
-A razão de existir dessa segunda parte é prática. Boa parte do padrão do
-projeto não está escrita em lugar nenhum: mora no código já existente, e quem
-chega depois só o descobre por imitação ou por comentário em revisão de código.
-Escrever o padrão reduz o tempo que um novo integrante leva para produzir
-código consistente com o resto e diminui a quantidade de discussão repetida nas
+A razão de existir dessa segunda parte é prática: boa parte do padrão do
+projeto não está escrita em lugar nenhum, mora no código já existente, e
+quem chega depois só o descobre por imitação ou por comentário em revisão de
+código. Escrever o padrão reduz o tempo que um novo integrante leva para
+produzir código consistente com o resto e diminui a discussão repetida nas
 revisões, que passam a se concentrar na lógica em vez da forma.
 
 \subsection{O que fica fora do repositório}
 
 Três categorias de artefato são deliberadamente mantidas fora do controle de
-versão. Os \textbf{segredos}, como senhas de banco, chaves de API e o segredo de
-assinatura dos \textit{tokens} JWT, são substituídos pelo \texttt{.env.example}
-e fornecidos em tempo de execução por variáveis de ambiente. Os
-\textbf{artefatos gerados}, como \texttt{node\_modules}, \textit{bundles} do
-\textit{frontend} e imagens de contêiner, são reconstrutíveis a partir do que
-está versionado e só ocupariam espaço e poluiriam o histórico.
+versão. Os \textbf{segredos} (senhas de banco, chaves de API, o segredo de
+assinatura dos \textit{tokens} JWT) são substituídos pelo
+\texttt{.env.example} e fornecidos em tempo de execução por variáveis de
+ambiente, e os \textbf{artefatos gerados} (\texttt{node\_modules},
+\textit{bundles} do \textit{frontend}, imagens de contêiner) são
+reconstrutíveis a partir do que está versionado, só ocupando espaço e
+poluindo o histórico.
 
-A terceira categoria é a mais importante neste sistema. Currículos,
-competências e histórico de desempenho são \textbf{dados pessoais de
-colaboradores} e, pelo RNF02, não podem sair do ambiente do cliente nem
-circular pelo repositório. Os ambientes de desenvolvimento e de homologação são
-populados por um \textit{script} de carga com dados sintéticos, esse sim
-versionado, e nenhuma cópia da base de produção é usada para depuração.
+A terceira categoria, a mais importante neste sistema, são os
+\textbf{dados pessoais de colaboradores}: currículos, competências e
+histórico de desempenho, que pelo RNF02 não podem sair do ambiente do
+cliente nem circular pelo repositório. Os ambientes de desenvolvimento e de
+homologação são populados por um \textit{script} de carga com dados
+sintéticos, esse sim versionado, e nenhuma cópia da base de produção é
+usada para depuração.
 
-Os pesos do modelo de IA treinado também não vão para o Git, por serem arquivos
-binários grandes e ilegíveis em \textit{diff}. O que fica versionado é o
-\textit{script} de treinamento, a configuração usada e o identificador da
-versão do modelo; o arquivo de pesos correspondente é publicado como anexo de
-uma \textit{release}. Assim continua sendo possível dizer, para qualquer versão
-do software em uso, qual modelo ela estava executando.
+Os pesos do modelo de IA treinado também não vão para o Git, por serem
+arquivos binários grandes e ilegíveis em \textit{diff}: o que fica
+versionado é o \textit{script} de treinamento, a configuração usada e o
+identificador da versão do modelo, e o arquivo de pesos correspondente é
+publicado como anexo de uma \textit{release}. Assim continua sendo possível
+dizer, para qualquer versão do software em uso, qual modelo ela estava
+executando.
 
 \subsection{Organização de \textit{branches} e versões}
 
@@ -1245,12 +1235,12 @@ origem a um \textit{branch} nomeado como
 identificador da história ou tarefa no Taiga.
 
 Fluxos mais elaborados, com um \textit{branch} de desenvolvimento permanente
-separado do de produção, foram considerados. Eles fazem sentido quando várias
-versões do produto precisam ser mantidas simultaneamente, o que não é o caso do
-RANK-IA: existe uma versão em produção por vez, e correções urgentes seguem o
-mesmo caminho das demais alterações, apenas com prioridade maior na fila de
-revisão. Adotar o fluxo mais complexo acrescentaria uma etapa de sincronização
-sem benefício correspondente.
+separado do de produção, foram considerados, mas fazem sentido apenas quando
+várias versões do produto precisam ser mantidas simultaneamente, o que não é
+o caso do RANK-IA: existe uma versão em produção por vez, e correções
+urgentes seguem o mesmo caminho das demais alterações, apenas com
+prioridade maior na fila de revisão. Adotar o fluxo mais complexo
+acrescentaria uma etapa de sincronização sem benefício correspondente.
 
 Ao final de cada \textit{sprint}, a \texttt{main} recebe uma \textit{tag}
 anotada seguindo versionamento semântico (\texttt{v0.1.0},
@@ -1267,29 +1257,29 @@ e como alterações relevantes são controladas. Quando uma alteração afetar
 vários artefatos, indiquem como a equipe mantém a coerência entre código,
 testes, documentação e demais elementos relacionados.}
 
-As dependências externas são fixadas por arquivo de trava. Nos projetos
+As dependências externas são fixadas por arquivo de trava: nos projetos
 Node.js, o \texttt{package-lock.json} é versionado e a instalação nas
 automações usa \texttt{npm ci}, que instala exatamente as versões travadas e
-falha se o \texttt{package.json} e o \texttt{package-lock.json} estiverem
-divergentes. Nos serviços Python, o \texttt{requirements.txt} registra versões
-exatas, e não faixas. O resultado é que a construção do software é
+falha se \texttt{package.json} e \texttt{package-lock.json} estiverem
+divergentes; nos serviços Python, o \texttt{requirements.txt} registra
+versões exatas, não faixas. O resultado é que a construção do software é
 determinística: dois integrantes que constroem o mesmo \textit{commit} em
 máquinas diferentes obtêm o mesmo conjunto de bibliotecas, e o que roda em
 produção é o que foi testado.
 
-A atualização dessas dependências fica a cargo do Dependabot, configurado para
-abrir um \textit{pull request} semanal por dependência desatualizada. Cada um
-desses \textit{pull requests} passa pela mesma verificação automatizada que uma
-alteração escrita pela equipe. Uma atualização que quebre os testes aparece
-isolada, em um \textit{pull request} próprio, em vez de ser descoberta no meio
-do desenvolvimento de outra funcionalidade.
+A atualização dessas dependências fica a cargo do Dependabot, configurado
+para abrir um \textit{pull request} semanal por dependência desatualizada,
+passando pela mesma verificação automatizada que uma alteração escrita pela
+equipe. Uma atualização que quebre os testes aparece isolada, em um
+\textit{pull request} próprio, em vez de ser descoberta no meio do
+desenvolvimento de outra funcionalidade.
 
-O controle de alterações se apoia inteiramente no \textit{pull request}. Nenhum
-código chega à \texttt{main} sem passar por um, e cada um exige a aprovação de
-ao menos um integrante que não seja o autor. O modelo de \textit{pull request}
-do repositório (\texttt{.github/pull\_request\_template.md}) traz uma lista de
-verificação curta, cujos itens são o que a equipe usa como \textit{Definition of
-Done}:
+O controle de alterações se apoia inteiramente no \textit{pull request}:
+nenhum código chega à \texttt{main} sem passar por um, e cada um exige a
+aprovação de ao menos um integrante que não seja o autor. O modelo de
+\textit{pull request} do repositório
+(\texttt{.github/pull\_request\_template.md}) traz uma lista de verificação
+curta, cujos itens são o que a equipe usa como \textit{Definition of Done}:
 
 \begin{itemize}[nosep]
     \item a alteração referencia a história ou tarefa correspondente no Taiga;
@@ -1304,18 +1294,18 @@ Done}:
     \item a verificação automatizada está aprovada.
 \end{itemize}
 
-Os três itens do meio são a resposta da equipe ao problema da coerência entre
-artefatos. A alteração mais representativa nesse sentido é justamente a
-prevista pelo RNF07: substituir o algoritmo de formação de equipes. Uma mudança
-dessas atinge, ao mesmo tempo, a implementação do serviço de IA, o contrato da
-interface \texttt{IIAGeradoraService} e a documentação desse contrato, os
-\textit{mocks} usados pelos testes de unidade do
-\texttt{GerenciadorDeEquipes}, a configuração de hiperparâmetros e a descrição
-do componente neste documento. A regra é que esses artefatos viajam juntos: um
-\textit{pull request} que altere a interface sem atualizar os testes e a
-documentação não é aprovado. É uma regra barata de seguir e é o que impede que a
-documentação se descole do código ao longo do tempo, que é a forma como
-documentação costuma morrer.
+Os três itens do meio são a resposta da equipe ao problema da coerência
+entre artefatos. A alteração mais representativa nesse sentido é justamente
+a prevista pelo RNF07 --- substituir o algoritmo de formação de equipes ---,
+que atinge ao mesmo tempo a implementação do serviço de IA, o contrato da
+interface \texttt{IIAGeradoraService} e sua documentação, os \textit{mocks}
+usados pelos testes de unidade do \texttt{GerenciadorDeEquipes}, a
+configuração de hiperparâmetros e a descrição do componente neste documento.
+A regra é que esses artefatos viajam juntos: um \textit{pull request} que
+altere a interface sem atualizar os testes e a documentação não é aprovado
+--- uma regra barata de seguir, e o que impede que a documentação se
+descole do código ao longo do tempo, que é a forma como documentação
+costuma morrer.
 
 \section{Rastreabilidade}\label{sec:rastreabilidade}
 
@@ -1325,26 +1315,26 @@ ou \textit{issue}, componente afetado, \textit{commit} e caso de teste.
 Não é necessário criar uma matriz extensa; um ou dois exemplos relevantes
 podem ser suficientes para demonstrar a prática.}
 
-O planejamento do trabalho acontece no Taiga.io, onde ficam o \textit{backlog},
-as histórias de usuário, as tarefas e o quadro Kanban com as colunas
-\textit{Novo}, \textit{Em Andamento}, \textit{Pronto para teste},
-\textit{Fechado} e \textit{Precisa de informação}. O código, as revisões e as
-automações ficam no GitHub. Manter as duas ferramentas desconectadas criaria
-duas fontes de verdade que divergem em poucas semanas, e a equipe evita isso
-com a integração de controle de versão do Taiga, configurada por
-\textit{webhook} no repositório.
+O planejamento do trabalho acontece no Taiga.io, onde ficam o
+\textit{backlog}, as histórias de usuário, as tarefas e o quadro Kanban com
+as colunas \textit{Novo}, \textit{Em Andamento}, \textit{Pronto para teste},
+\textit{Fechado} e \textit{Precisa de informação}, enquanto o código, as
+revisões e as automações ficam no GitHub. Manter as duas ferramentas
+desconectadas criaria duas fontes de verdade que divergem em poucas
+semanas, o que a equipe evita com a integração de controle de versão do
+Taiga, configurada por \textit{webhook} no repositório.
 
-A ligação se dá pela mensagem de \textit{commit}. Toda mensagem cita a
+A ligação se dá pela mensagem de \textit{commit}: toda mensagem cita a
 referência do item no Taiga no formato \texttt{TG-<ref>}, e o Taiga passa a
 exibir aquele \textit{commit} no histórico da história ou tarefa
 correspondente. A mesma referência aparece no nome do \textit{branch} e no
-título do \textit{pull request}, de modo que a simples leitura do histórico do
-Git já revela a que necessidade cada alteração atende. As \textit{issues} do
-GitHub são usadas para o que nasce fora do planejamento da \textit{sprint},
-tipicamente defeitos encontrados em revisão, em teste ou relatados por um
-usuário, e são espelhadas como \textit{issues} no Taiga para que o quadro
-continue refletindo todo o trabalho em andamento, e não apenas o que foi
-planejado.
+título do \textit{pull request}, de modo que a simples leitura do histórico
+do Git já revela a que necessidade cada alteração atende, enquanto as
+\textit{issues} do GitHub são usadas para o que nasce fora do planejamento
+da \textit{sprint} --- tipicamente defeitos encontrados em revisão, em
+teste ou relatados por um usuário --- e são espelhadas como \textit{issues}
+no Taiga para que o quadro continue refletindo todo o trabalho em
+andamento, não apenas o que foi planejado.
 
 Uma limitação já observada pela equipe merece registro: o Taiga gera os
 identificadores de histórias e tarefas de forma sequencial e automática, sem
@@ -1407,34 +1397,36 @@ como o processo é realizado manualmente.}
 
 \subsection{Construção local}
 
-O sistema é composto por quatro processos e um banco de dados, cada um com suas
-próprias exigências de versão de tempo de execução, de bibliotecas nativas e de
-configuração. Montar esse ambiente manualmente é demorado, mas o problema maior
-não é o tempo: é que cada integrante acabaria com uma combinação ligeiramente
-diferente de versões de Node.js, de Python e de PostgreSQL, além das
-particularidades do próprio sistema operacional. Basta uma dessas diferenças
-para que um defeito apareça na máquina de um desenvolvedor e não na do outro, e
-o esforço passa a ser gasto investigando o ambiente em vez do software.
+O sistema é composto por quatro processos e um banco de dados, cada um com
+suas próprias exigências de versão de tempo de execução, de bibliotecas
+nativas e de configuração, e montar esse ambiente manualmente é demorado ---
+mas o problema maior não é o tempo, é que cada integrante acabaria com uma
+combinação ligeiramente diferente de versões de Node.js, de Python e de
+PostgreSQL, além das particularidades do próprio sistema operacional. Basta
+uma dessas diferenças para que um defeito apareça na máquina de um
+desenvolvedor e não na do outro, e o esforço passa a ser gasto investigando
+o ambiente em vez do software.
 
-\textbf{É exatamente esse risco que o uso do Docker elimina.} Ao descrever cada
-serviço em um \texttt{Dockerfile} e a composição entre eles no
+\textbf{É exatamente esse risco que o uso do Docker elimina.} Ao descrever
+cada serviço em um \texttt{Dockerfile} e a composição entre eles no
 \texttt{docker-compose.yml}, o ambiente de execução deixa de ser uma
 característica da máquina de quem programa e passa a ser um item de
-configuração versionado como qualquer outro. Todos os integrantes executam as
-mesmas versões, com as mesmas dependências de sistema, independentemente de
-estarem em Linux, Windows ou macOS, e um único comando levanta o
-\textit{frontend}, a API, os dois serviços Python e a instância do PostgreSQL.
-Na primeira execução, um \textit{script} aplica as migrações e carrega a base
-sintética de colaboradores. O passo a passo detalhado fica na wiki, e não neste
-documento, porque é o tipo de informação que muda com frequência.
+configuração versionado como qualquer outro: todos os integrantes executam
+as mesmas versões, com as mesmas dependências de sistema, independentemente
+de estarem em Linux, Windows ou macOS, e um único comando levanta o
+\textit{frontend}, a API, os dois serviços Python e a instância do
+PostgreSQL, com um \textit{script} aplicando as migrações e carregando a
+base sintética de colaboradores na primeira execução. O passo a passo
+detalhado fica na wiki, e não neste documento, porque é o tipo de
+informação que muda com frequência.
 
-A garantia não para no ambiente local. Como a esteira de integração contínua e
-os ambientes de homologação e produção executam essas mesmas imagens, a
-uniformidade se estende por todo o caminho: um comportamento observado na
-máquina de um integrante é reproduzível na verificação automatizada e no
-servidor que atende o cliente. O clássico \textit{funciona na minha máquina}
-deixa de ser um argumento possível, porque a máquina é a mesma em todos os
-pontos do processo.
+A garantia não para no ambiente local: como a esteira de integração
+contínua e os ambientes de homologação e produção executam essas mesmas
+imagens, um comportamento observado na máquina de um integrante é
+reproduzível na verificação automatizada e no servidor que atende o
+cliente. O clássico \textit{funciona na minha máquina} deixa de ser um
+argumento possível, porque a máquina é a mesma em todos os pontos do
+processo.
 
 A mesma base de código é construída de duas formas diferentes, conforme o
 objetivo. Não são dois softwares, e sim duas configurações de construção:
@@ -1452,9 +1444,9 @@ objetivo. Não são dois softwares, e sim duas configurações de construção:
     aplicadas de forma controlada antes de a nova versão entrar no ar.
 \end{itemize}
 
-Em nenhum dos casos há configuração específica de ambiente escrita no código. O
-que muda são variáveis de ambiente, de modo que a mesma imagem verificada pela
-automação é a que roda para o cliente.
+Em nenhum dos casos há configuração específica de ambiente escrita no
+código: o que muda são variáveis de ambiente, de modo que a mesma imagem
+verificada pela automação é a que roda para o cliente.
 
 \subsection{Integração contínua}
 
@@ -1492,20 +1484,20 @@ Documentação & Alterações em \texttt{projeto/} & Compila este documento com
 \end{tabularx}
 \end{table}
 
-A \texttt{main} exige que todas essas verificações estejam aprovadas e que haja
-ao menos uma aprovação humana antes da integração. Com isso ela permanece
-sempre em estado construível, e qualquer integrante pode partir dela para uma
-nova tarefa sem antes precisar descobrir se está quebrada, o que importa em uma
-equipe que trabalha de forma assíncrona e em horários distintos.
+A \texttt{main} exige que todas essas verificações estejam aprovadas e que
+haja ao menos uma aprovação humana antes da integração, permanecendo
+sempre em estado construível: qualquer integrante pode partir dela para uma
+nova tarefa sem antes precisar descobrir se está quebrada, o que importa em
+uma equipe que trabalha de forma assíncrona e em horários distintos.
 
-Vale destacar a divisão de trabalho entre a esteira e a revisão humana. A
-análise estática cobre a parte mecânica do padrão de código, que é formatação,
-nomenclatura e regras de estilo, e por isso essa parte não precisa mais ser
-discutida nos comentários de revisão. O que a ferramenta não consegue julgar,
-como se a abstração criada é a certa, se o comentário explica o que precisava
-ser explicado e se a alteração respeita a organização de módulos descrita na
-wiki, fica com o revisor. É essa divisão que mantém a revisão de código focada
-em decisões de projeto.
+Vale destacar a divisão de trabalho entre a esteira e a revisão humana: a
+análise estática cobre a parte mecânica do padrão de código --- formatação,
+nomenclatura e regras de estilo ---, que por isso não precisa mais ser
+discutida nos comentários de revisão. O que a ferramenta não consegue
+julgar, como se a abstração criada é a certa, se o comentário explica o que
+precisava ser explicado e se a alteração respeita a organização de módulos
+descrita na wiki, fica com o revisor, o que mantém a revisão de código
+focada em decisões de projeto.
 
 \subsection{Ambientes e entrega}
 
@@ -1525,22 +1517,23 @@ versão e o PDF desta documentação, aplica as migrações pendentes e sobe a n
 versão.
 
 O objetivo de confiabilidade definido na Seção~\ref{sec:quality-goals} tem
-consequência direta sobre esse último passo. Como o sistema precisa permanecer
-disponível durante o horário comercial, a subida é feita de forma gradual, com
-as instâncias sendo substituídas uma a uma, e só é considerada concluída depois
-que a nova versão responde corretamente à verificação de saúde. Migrações são
-escritas de modo a manter compatibilidade com a versão anterior durante a
-transição, o que permite reverter para a \textit{tag} anterior sem perder
-dados caso algum problema apareça logo após a liberação. A implantação em si
-depende de uma aprovação explícita na esteira: a equipe automatizou a execução,
-mas manteve a decisão de liberar como um ato humano e consciente.
+consequência direta sobre esse último passo: como o sistema precisa
+permanecer disponível durante o horário comercial, a subida é feita de
+forma gradual, com as instâncias sendo substituídas uma a uma, só sendo
+considerada concluída depois que a nova versão responde corretamente à
+verificação de saúde. Migrações são escritas de modo a manter
+compatibilidade com a versão anterior durante a transição, o que permite
+reverter para a \textit{tag} anterior sem perder dados caso algum problema
+apareça logo após a liberação, e a implantação em si depende de uma
+aprovação explícita na esteira: a equipe automatizou a execução, mas
+manteve a decisão de liberar como um ato humano e consciente.
 
-O que essa automação entrega, no fim, é confiança para entregar com frequência.
-A equipe consegue publicar uma versão a cada duas semanas sabendo que o que
-está na \texttt{main} compila, passa nos testes, mantém o vínculo com o item de
-trabalho que o originou e pode ser revertido em minutos. Sem isso, o custo de
-cada entrega cresce, a frequência cai e o software passa a mudar mais devagar
-do que a organização que depende dele.
+O que essa automação entrega, no fim, é confiança para entregar com
+frequência: a equipe consegue publicar uma versão a cada duas semanas
+sabendo que o que está na \texttt{main} compila, passa nos testes, mantém o
+vínculo com o item de trabalho que o originou e pode ser revertido em
+minutos. Sem isso, o custo de cada entrega cresce, a frequência cai e o
+software passa a mudar mais devagar do que a organização que depende dele.
 
 
 %\section{Manutenção}
