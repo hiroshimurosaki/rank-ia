@@ -21,23 +21,35 @@ semestre 5 (ES2).
 ```
 rank-ia/
 ├── projeto/          # Documentação do projeto final em LaTeX (ES2 – 2026)
-│   ├── projeto-final.tex   # fonte principal (título e autores já preenchidos)
+│   ├── documentacao-rank-ia.tex   # fonte principal (título e autores já preenchidos)
+│   ├── documentacao-rank-ia.pdf   # PDF gerado a partir do .tex
 │   ├── refs.bib
 │   ├── images/
-│   └── template-original.pdf   # PDF de referência do template
+│   ├── template-original.tex     # template original do modelo, sem alterações
+│   └── template-original.pdf     # PDF de referência do template
 ├── apresentacoes/    # Slides e pitch do RANK-IA (semestres 4 e 5)
-└── documentos/       # PDF do projeto final, documento de ES2 e nota do projeto
+└── documentos/       # PDFs entregues em ES1/ES2, diagrama C4 e nota do projeto
 ```
 
 ## Compilar a documentação
 
+Requer uma distribuição LaTeX (ex.: [MiKTeX](https://miktex.org/) ou TeX Live)
+com `pdflatex` e `bibtex` no `PATH`.
+
 ```bash
 cd projeto
-pdflatex projeto-final.tex
-bibtex projeto-final
-pdflatex projeto-final.tex
-pdflatex projeto-final.tex
+pdflatex -interaction=nonstopmode -aux-directory=build documentacao-rank-ia.tex
+bibtex build/documentacao-rank-ia
+pdflatex -interaction=nonstopmode -aux-directory=build documentacao-rank-ia.tex
+pdflatex -interaction=nonstopmode -aux-directory=build documentacao-rank-ia.tex
 ```
 
+A flag `-aux-directory=build` (MiKTeX) manda todo o lixo de compilação
+(`.aux`, `.log`, `.bbl`, `.out`, `.toc`...) para `projeto/build/`, que já está
+no `.gitignore`, em vez de espalhar esses arquivos junto do `.tex`. O PDF
+final continua sendo gerado direto em `projeto/documentacao-rank-ia.pdf`. Com
+TeX Live, o equivalente é `-output-directory=build`, mas nesse caso o PDF
+também vai parar em `build/` e precisa ser copiado de volta.
+
 > Antes da entrega final, trocar `\orientacoestrue` por `\orientacoesfalse` no início do
-> `projeto-final.tex` para ocultar as orientações do template.
+> `documentacao-rank-ia.tex` para ocultar as orientações do template.

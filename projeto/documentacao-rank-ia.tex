@@ -18,6 +18,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[brazil]{babel}
 \usepackage{graphicx}
+\usepackage{xcolor}
+\definecolor{isogreen}{HTML}{2E7D32}
+\usepackage{placeins}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{array}
@@ -230,21 +233,21 @@ o registro das competências dos colaboradores até o acompanhamento dos resulta
 da equipe formada. Fazem parte do sistema:
 
 \begin{itemize}[nosep]
-    \item \textbf{Gerenciamento de colaboradores} --- cadastro manual por
+    \item \textbf{Gerenciamento de colaboradores}: cadastro manual por
     formulário ou importação assistida a partir de currículos em PDF, com
     extração automática de habilidades e experiências.
-    \item \textbf{Geração de equipes por IA} --- composição automática a partir
+    \item \textbf{Geração de equipes por IA}: composição automática a partir
     dos critérios informados pelo gestor (tamanho da equipe, habilidades
     exigidas, peso da experiência), com cálculo do Coeficiente de Aproveitamento
     para cada sugestão.
-    \item \textbf{Ajuste manual com retroalimentação} --- interface para
+    \item \textbf{Ajuste manual com retroalimentação}: interface para
     substituir, incluir ou remover membros de uma sugestão; cada alteração é
     registrada e utilizada como \textit{feedback} para o modelo.
-    \item \textbf{Relatórios e indicadores} --- visualização gráfica da qualidade
+    \item \textbf{Relatórios e indicadores}: visualização gráfica da qualidade
     das equipes e relatórios de desempenho individual e coletivo.
-    \item \textbf{Sugestão de treinamentos} --- recomendação de capacitações
+    \item \textbf{Sugestão de treinamentos}: recomendação de capacitações
     associadas às lacunas identificadas no perfil dos colaboradores.
-    \item \textbf{Controle de acesso por perfil} --- autenticação e autorização
+    \item \textbf{Controle de acesso por perfil}: autenticação e autorização
     diferenciadas para os perfis Gestor/RH e Colaborador, com tratamento dos
     dados pessoais conforme a LGPD.
 \end{itemize}
@@ -350,6 +353,54 @@ repetidamente ao longo da vida do sistema, tratá-lo como uma dependência
 substituível é uma decisão que atravessa toda a arquitetura descrita no
 Capítulo~\ref{cha:arquitetura}.
 
+\section{Regras de negócio}
+
+Além dos requisitos, um conjunto de regras de negócio restringe o
+comportamento do sistema: definem quando uma ação é permitida, o que é
+obrigatório registrar e como o sistema deve reagir diante de dados
+incompletos. Essas regras foram levantadas na etapa anterior do projeto e
+permanecem válidas; a Tabela~\ref{tab:regras-negocio} as resume.
+
+\begin{table}[ht]
+\centering
+\caption{Regras de negócio do RANK-IA.}
+\label{tab:regras-negocio}
+\begin{tabularx}{0.95\textwidth}{p{0.08\textwidth} X}
+\toprule
+\textbf{ID} & \textbf{Descrição} \\
+\midrule
+RN01 & Os colaboradores devem ter seus dados de competências, habilidades e
+experiências atualizados periodicamente pelo setor de RH, garantindo
+precisão nas recomendações da IA. \\
+RN02 & Somente colaboradores com dados completos podem ser considerados na
+formação automatizada de equipes. \\
+RN03 & Toda alteração manual realizada pelo RH ou gestor deve ser
+registrada, contendo motivo e mudanças feitas; esses dados alimentam o
+modelo de IA. \\
+RN04 & O acesso é restrito por perfil: RH e gestores têm acesso total ao
+sistema; colaboradores, apenas às próprias informações e aos treinamentos
+sugeridos. \\
+RN05 & Cada equipe formada deve gerar automaticamente seu Coeficiente de
+Aproveitamento, calculado com base em métricas definidas previamente. \\
+RN06 & O sistema deve gerar relatórios de desempenho das equipes e de
+evolução individual dos colaboradores e, a partir dos \textit{gaps}
+evidenciados, sugerir treinamentos específicos. \\
+RN07 & Cada equipe gerada deve ser registrada como uma versão, permitindo
+rastrear modificações ao longo do tempo e garantindo auditoria do
+processo. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+RN02 e RN07 merecem destaque porque são as regras que mais diretamente
+geram casos de teste: a primeira define a condição de contorno que separa
+um colaborador elegível de um inelegível para a geração automática, e a
+segunda exige que o sistema nunca sobrescreva uma composição anterior sem
+deixar rastro. Ambas reaparecem como critério de aceite no
+Capítulo~\ref{cha:testes}.
+
+\FloatBarrier
+
 \section{Objetivos de qualidade}\label{sec:quality-goals}
 
 \orientacao{Identifiquem os atributos de qualidade que realmente influenciam
@@ -368,7 +419,59 @@ neste documento.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{01_2_iso-25010-topics-EN.drawio.png}
+\setlength{\fboxsep}{12pt}
+\setlength{\fboxrule}{0.6pt}
+\fbox{\begin{minipage}{0.94\textwidth}
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Functional Suitability}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize System provides functions that meet stated or implied needs.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Reliability}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize System can maintain a specified level of performance when used
+under specified conditions.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Security}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize Protection of system items from accidental or malicious access,
+use, modification, destruction, or disclosure.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Maintainability}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize System can be modified, corrected, adapted or improved due to
+changes in environment or requirements.
+\end{minipage}
+
+\vspace{12pt}
+
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Performance Efficiency}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize System provides appropriate performance, relative to the
+amount of resources used.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Usability}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize System can be understood, learned, used and is attractive to
+users.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Compatibility}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize Two or more systems can exchange information while sharing the
+same environment.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.235\linewidth}
+\parbox[t][2\baselineskip][t]{\linewidth}{\bfseries\color{isogreen}Transferability}\\[2pt]
+{\color{isogreen}\rule{\linewidth}{0.8pt}}\\[4pt]
+\footnotesize System can be transferred from one environment to another.
+\end{minipage}
+\end{minipage}}
 \caption{Características do modelo de qualidade de produto da ISO/IEC 25010.}
 \label{fig:iso25010}
 \end{figure}
@@ -411,12 +514,24 @@ dependência de \textit{plugins}, e leitura e exportação em formatos abertos
 \end{tabularx}
 \end{table}
 
+Dois desses objetivos ainda carecem de uma meta numérica explícita neste
+documento. Confiabilidade é medida, no plano de qualidade da equipe, por uma
+disponibilidade de serviço (\textit{uptime}) de 99,5\% durante o horário
+comercial e por um MTBF (tempo médio entre falhas) superior a 720 horas de
+operação contínua. Compatibilidade é medida por uma taxa de sucesso de 99\%
+na leitura de currículos em PDF gerados por diferentes versões de editor,
+dado que a extração de currículos é o ponto do sistema mais exposto a
+variação no formato de entrada. Essas duas metas, somadas às já registradas
+nas Tabelas~\ref{tab:rnf} e \ref{tab:quality-goals}, são o que o
+Capítulo~\ref{cha:testes} usa como critério de aceite para os testes de
+sistema e de compatibilidade.
+
 Os dois primeiros objetivos merecem uma observação, porque tensionam entre si. A
 adequação funcional pressiona a equipe a experimentar com o modelo de IA, o que
 tende a gerar código acoplado ao algoritmo do momento; a manutenibilidade exige o
 contrário. A escolha do projeto foi privilegiar a manutenibilidade na fronteira
-entre o domínio e a IA --- isolando o modelo atrás de uma abstração --- de modo
-que a experimentação fique contida em um único componente substituível. As
+entre o domínio e a IA --- isolando o modelo atrás de uma abstração --- de
+modo que a experimentação fique contida em um único componente substituível. As
 consequências dessa decisão são detalhadas no
 Capítulo~\ref{cha:arquitetura} e no Capítulo~\ref{cha:componentes}.
 
@@ -575,11 +690,60 @@ documento e forneçam o link para o material completo.}
 software e reduzir o risco de defeitos. O capítulo deve apresentar uma
 estratégia coerente, e não apenas uma lista de ferramentas.}
 
+A estratégia de testes do RANK-IA acompanha a divisão em quatro processos e
+um banco de dados descrita no Capítulo~\ref{cha:configuracao}: o
+\textit{frontend}, a API e os dois serviços em Python (IA Geradora de
+Equipes e IA Analista de Currículos), além do PostgreSQL. Cada nível de
+teste cobre um tipo de defeito que os outros não alcançam, e nenhum
+substitui os demais.
+
+A estratégia também separa dois papéis complementares: verificação, que
+responde à pergunta ``estamos construindo o software corretamente?'', e
+validação, que responde a ``estamos construindo o software certo?''. Os
+níveis de unidade, integração e contrato,
+descritos nas próximas seções, respondem à primeira pergunta; a validação e
+a aceitação, tratadas na Seção~\ref{sec:validacao}, respondem à segunda.
+Como a equipe é pequena e os mesmos quatro integrantes desenvolvem e testam,
+o RANK-IA não conta com um grupo de teste independente separado; o papel que
+caberia a esse grupo --- avaliar o código sem o viés de quem o escreveu ---
+é cumprido pela exigência, já registrada no Capítulo~\ref{cha:configuracao},
+de que todo \textit{pull request} seja aprovado por alguém que não seja o
+autor.
+
 \section{Planejamento e níveis de teste}
 
 \orientacao{Indiquem os níveis de teste aplicáveis ao projeto, por exemplo,
 unidade, integração e sistema, e expliquem o objetivo de cada um deles no
 contexto do software.}
+
+Testes de unidade verificam uma função ou classe isolada, sem depender de
+rede, banco ou dos demais serviços; são o nível mais barato de manter e o
+primeiro a apontar um defeito, o que os torna a base da pirâmide. Testes de
+integração verificam se a API de fato consegue conversar com os dois
+serviços de IA e com o banco, sem que o comportamento correto de um dependa
+de uma suposição errada sobre o outro.
+
+Entre esses dois níveis, o projeto adota também um nível de \textbf{teste de
+contrato}. O RNF07 promete que o modelo de IA pode ser substituído sem
+alterar a lógica de negócio; o que precisa ser validado, então, não é uma
+implementação específica, e sim o contrato da interface
+\texttt{IIAGeradoraService} em si: a mesma bateria de testes deve passar
+independentemente de qual serviço a implementa no momento. Sem esse nível, a
+promessa do RNF07 fica só na intenção, porque nada garante que uma troca de
+implementação não quebre silenciosamente uma suposição que só existia na
+cabeça de quem escreveu a versão anterior.
+
+Depois que o software está integrado, dois níveis de ordem superior fecham a
+pirâmide. A validação, tratada na Seção~\ref{sec:validacao}, confirma que o
+sistema atende aos requisitos do ponto de vista do usuário, exercitando os
+fluxos principais e alternativos já descritos nos casos de uso UC-01
+(Gerenciar Colaboradores), UC-02 (Gerar Equipes com IA) e UC-03 (Ajustar
+Equipe Manualmente), documentados na etapa anterior do projeto. O teste de
+sistema, tratado na Seção~\ref{sec:teste-sistema}, verifica o RANK-IA já
+combinado aos demais elementos do ambiente (carga, falha de um serviço,
+segurança, configuração), e é o que dá sustância às metas quantitativas de
+Confiabilidade e Compatibilidade fechadas na Seção~\ref{sec:quality-goals},
+que de outra forma ficariam sem verificação correspondente.
 
 \section{Testes de unidade}
 
@@ -589,6 +753,66 @@ expliquem se serão utilizados \textit{stubs}, \textit{mocks} ou outras formas
 de substituição. Apresentem exemplos representativos contendo entradas,
 condições e resultados esperados.}
 
+As unidades priorizadas para teste são as que concentram regra de negócio,
+não as que só encaminham dados: o cálculo do Coeficiente de Aproveitamento
+(RN05), a validação de elegibilidade de um colaborador para entrar na
+geração automática (RN02), o controle de acesso por perfil (RN04) e o
+registro de uma nova versão de equipe (RN07). Dependências externas ao
+módulo testado --- o módulo de IA, o serviço de e-mail, o banco --- são
+substituídas por \textit{mocks} que respeitam as interfaces já definidas
+(\texttt{IIAGeradoraService}, \texttt{INotificadorService}), o que só é
+possível porque essas dependências foram isoladas atrás de abstrações desde
+o projeto de componentes; é o pagamento concreto da decisão de manutenibilidade
+discutida no Capítulo~\ref{cha:componentes}. A Tabela~\ref{tab:testes-unidade}
+apresenta exemplos representativos.
+
+\begin{table}[ht]
+\centering
+\caption{Exemplos de casos de teste de unidade.}
+\label{tab:testes-unidade}
+\begin{tabularx}{0.95\textwidth}{p{0.20\textwidth} p{0.30\textwidth} X}
+\toprule
+\textbf{Unidade} & \textbf{Entrada / condição} & \textbf{Resultado esperado} \\
+\midrule
+Cálculo do CA & Equipe com todos os membros possuindo as habilidades
+requeridas & CA no valor máximo definido pela escala \\
+Cálculo do CA & Um membro sem nenhuma das habilidades requeridas &
+CA reduzido de forma proporcional, nunca negativo \\
+Elegibilidade (RN02) & Colaborador com cadastro incompleto (habilidade sem
+nível) & Colaborador excluído do conjunto elegível, sem erro não tratado \\
+Controle de acesso (RN04) & Colaborador autenticado tenta acessar rota de
+gestão de equipes & Acesso negado, sem exposição de dados de outros
+colaboradores \\
+Versionamento (RN07) & Equipe existente recebe um ajuste manual & Nova versão
+criada; versão anterior permanece recuperável \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Uma técnica complementa os casos fixos da Tabela~\ref{tab:testes-unidade} no
+módulo de cálculo do CA, por ser o de maior risco de negócio (é a Adequação
+Funcional priorizada como Alta na Seção~\ref{sec:quality-goals}): o
+\textbf{teste baseado em propriedades}. Em vez de fixar entradas, o teste
+declara invariantes que devem valer para qualquer entrada válida (por
+exemplo, ``substituir um membro por outro com competências estritamente
+superiores nunca reduz o CA da equipe''), e uma ferramenta gera
+automaticamente combinações de colaboradores tentando violar essa
+propriedade.
+
+\subsection{\textit{Test-Driven Development}}
+
+No módulo de cálculo do CA e nas regras de negócio da
+Tabela~\ref{tab:regras-negocio}, a equipe adota TDD: o teste é escrito antes
+do código de produção, falha por não existir implementação, e só então é
+escrito o código mínimo necessário para passar, seguido de refatoração. A
+adoção não é ampla: código de integração com os serviços de IA e telas de
+interface continuam sendo testados depois de escritos, porque o custo de
+simular a resposta da IA antes mesmo de decidir o formato da integração
+seria maior que o benefício. TDD fica reservado à lógica de domínio, que é
+justamente onde escrever o teste primeiro força o desenho a ser testável e
+desacoplado, pagando na prática o objetivo de manutenibilidade do
+Capítulo~\ref{cha:arquitetura}.
+
 \section{Testes de integração}
 
 \orientacao{Expliquem como os componentes serão integrados e testados. Quando
@@ -596,6 +820,119 @@ fizer sentido, indiquem a estratégia adotada (por exemplo, \textit{top-down},
 \textit{bottom-up}, \textit{depth-first} ou \textit{breadth-first}) e
 justifiquem-na. Descrevam também como testes de regressão serão utilizados
 após alterações.}
+
+A integração segue estratégia \textit{top-down} a partir da API, que é o
+componente que orquestra os dois serviços de IA e o banco: primeiro se
+valida que a API conversa corretamente com cada serviço isoladamente
+(contrato), depois que a cadeia completa --- requisição do gestor,
+processamento da IA, persistência --- produz o resultado esperado. A opção
+por \textit{top-down} em vez de \textit{bottom-up} é intencional: é a API
+que concentra a regra de negócio, e um defeito de integração que afete o
+gestor quase sempre aparece primeiro ali, não nos serviços Python isolados.
+
+Os cenários de integração priorizados vêm diretamente dos fluxos
+alternativos dos casos de uso levantados na etapa anterior:
+\begin{itemize}[nosep]
+    \item \textbf{Falha na leitura do PDF} (UC-01): currículo corrompido,
+    digitalizado como imagem sem camada de texto, em formato inesperado ou
+    vazio. Em todos os casos, a API deve responder com uma falha tratada e
+    sugerir o cadastro manual, nunca propagar uma exceção não tratada do
+    serviço de IA para o \textit{frontend}.
+    \item \textbf{Colaboradores insuficientes} (UC-02): base de dados sem
+    colaboradores com as habilidades exigidas. A API deve notificar a
+    impossibilidade de forma explícita, em vez de devolver uma equipe
+    incompleta silenciosamente.
+    \item \textbf{Cancelar ajuste} (UC-03): o gestor reverte um ajuste manual
+    antes de confirmar. A composição original da IA deve ser restaurada sem
+    que o cancelamento seja registrado como \textit{feedback} para o modelo.
+\end{itemize}
+
+A regressão é responsabilidade da esteira de integração contínua, não de uma
+execução manual: a cada \textit{pull request} para a \texttt{main}, o
+trabalho ``Testes de integração'' descrito na Tabela~\ref{tab:ci} sobe um
+PostgreSQL efêmero e executa essa suíte por completo, de modo que uma
+alteração no serviço de IA que quebre um contrato já validado é pega antes
+da revisão humana, não depois dela.
+
+\section{Teste de validação e aceitação}\label{sec:validacao}
+
+\orientacao{Descrevam como a equipe verifica se o software atende aos
+requisitos do ponto de vista do usuário, e como está prevista a aceitação
+por parte de quem vai efetivamente usar o sistema.}
+
+A validação confirma que o RANK-IA integrado atende aos requisitos
+funcionais da Tabela~\ref{tab:rf} e às regras de negócio da
+Tabela~\ref{tab:regras-negocio} do ponto de vista de quem vai usar o
+sistema, não de quem o escreveu. O critério de validação, portanto, não é
+``o código faz o que o desenvolvedor pretendia'', mas ``o sistema faz o que
+o RF ou a RN descrevem''; quando os dois divergem, quem está certo é o
+requisito.
+
+A aceitação segue o mesmo desenho de dois ambientes já descrito no
+Capítulo~\ref{cha:configuracao}. O ambiente de homologação cumpre o papel do
+que a literatura de teste chama de teste alfa: a cada integração na
+\texttt{main}, a equipe (e, quando disponível, um representante do RH que
+participou do levantamento de requisitos na etapa anterior do projeto)
+usa o incremento nesse ambiente antes da liberação, sob observação direta de
+quem desenvolveu, o que permite registrar tanto falhas quanto dificuldades
+de uso que não chegam a configurar um defeito. Um teste beta formal,
+conduzido sem a presença da equipe em instalações do cliente, não se aplica
+a este projeto: o RANK-IA ainda não tem uma organização cliente em produção,
+e a validação com usuário externo, fora do ambiente controlado da equipe,
+fica registrada aqui como prática a adotar assim que houver uma organização
+piloto, e não como algo já executado.
+
+\section{Teste de sistema}\label{sec:teste-sistema}
+
+\orientacao{Descrevam como o software será testado já combinado aos demais
+elementos do sistema (hardware, rede, pessoas, dados), cobrindo aspectos como
+recuperação de falhas, segurança, desempenho sob carga e configuração.}
+
+Testado como parte de um sistema maior --- que inclui o banco de dados, a
+rede e as pessoas que o operam ---, o RANK-IA passa por cinco verificações
+de ordem superior, cada uma expondo um tipo de falha que os níveis
+anteriores não alcançam.
+
+\textbf{Teste de recuperação.} Um roteiro derruba de propósito o contêiner da
+IA Geradora de Equipes em ambiente de homologação, no meio de uma
+requisição, e verifica se a API degrada para o fluxo de cadastro/composição
+manual (UC-01, UC-03) em vez de retornar erro ao gestor, e se a recuperação
+automática do contêiner devolve o serviço sem intervenção humana. É a única
+forma de testar na prática, e não só na interface, a substituibilidade
+prometida pelo RNF07.
+
+\textbf{Teste de segurança.} Segue a divisão já registrada na
+Tabela~\ref{tab:rnf}: uma varredura automatizada (OWASP ZAP, modo linha de
+base) roda contra as rotas de \textit{upload} de currículo a cada
+\textit{release}, e o teste de penetração completo permanece com a equipe de
+Pentest, fora da automação, exatamente como o RNF02 já prevê.
+
+\textbf{Teste por esforço.} Um cenário de k6 simula as 50 mil conexões
+simultâneas da meta de Escalabilidade (Tabela~\ref{tab:rnf}), medindo se o
+tempo de resposta médio e a taxa de erro permanecem dentro do limite
+definido. Um segundo cenário, de sensibilidade, gera currículos com volumes
+extremos de habilidades listadas e solicita equipes com o número máximo de
+membros permitido, para verificar se uma entrada dentro dos limites válidos,
+mas próxima da fronteira, não degrada desproporcionalmente o cálculo do CA.
+
+\textbf{Teste de desempenho.} Medido em conjunto com o teste por esforço, mas
+também sob carga normal: o tempo entre o gestor solicitar a geração de uma
+equipe e a resposta com as sugestões é o que a meta de Desempenho da
+Tabela~\ref{tab:rnf} fixa em mais de 90\% das equipes formadas dentro do
+tempo esperado.
+
+\textbf{Teste de disponibilização.} Executa a suíte de sistema em cada
+combinação de navegador e resolução previstas na RNF06 (Chrome, Firefox,
+Edge; a partir de 1024\,px), e valida que o \textit{script} de carga inicial
+de dados sintéticos e as migrações rodam sem intervenção manual em uma
+instalação limpa do ambiente Docker descrito no Capítulo~\ref{cha:configuracao}.
+
+Como as etapas de recuperação, esforço e disponibilização são caras para
+rodar a cada \textit{commit}, ficam fora da esteira padrão de \textit{pull
+request} e são executadas em horário agendado ou antes de uma
+\textit{release}, seguindo a mesma lógica de custo que já separa a esteira
+de integração contínua da liberação em produção no
+Capítulo~\ref{cha:configuracao}.
 
 \section{Critérios de conclusão e cobertura}
 
@@ -605,10 +942,113 @@ indicadores, mas não deve ser tratada isoladamente como garantia de qualidade.
 Se uma meta quantitativa for adotada, indiquem o tipo de cobertura e
 justifiquem a meta.}
 
-\section{Automação e ferramentas}
+A atividade de teste é considerada satisfatória quando três condições se
+verificam ao mesmo tempo, e não quando qualquer uma delas isoladamente é
+atingida. Primeiro, cobertura: 80\% de cobertura de linha no módulo de
+domínio (cálculo do CA, regras de elegibilidade e versionamento), sem meta
+equivalente para código de interface, onde cobertura alta tende a testar o
+\textit{framework} em vez da lógica da equipe. Segundo, rastreabilidade: todo
+requisito funcional da Tabela~\ref{tab:rf} tem ao menos um teste de validação
+associado (Seção~\ref{sec:validacao}), e toda regra de negócio da
+Tabela~\ref{tab:regras-negocio} tem ao
+menos um teste de unidade ou integração associado. Essa exigência
+estende, para o nível de teste, a mesma cadeia de rastreabilidade descrita
+na Seção~\ref{sec:rastreabilidade}, que hoje termina no caso de teste sem
+detalhar o que isso significa. Terceiro, metas quantitativas: cada meta
+numérica de RNF ou de objetivo de qualidade (Tabelas~\ref{tab:rnf} e
+\ref{tab:quality-goals}) tem um teste de sistema correspondente, descrito na
+Seção~\ref{sec:teste-sistema}, que a exercita de forma direta.
+
+Cobertura de código entra nesses critérios como piso, não como alvo: um
+módulo pode chegar a 100\% de cobertura de linha exercitando apenas o
+caminho de sucesso, sem que isso diga nada sobre o comportamento diante de
+um currículo corrompido ou de uma base sem colaboradores elegíveis. Por
+isso, a meta de 80\% é sempre lida em conjunto com os cenários de exceção da
+Seção anterior, nunca isoladamente.
+
+\section{Depuração}
+
+\orientacao{Descrevam, ainda que brevemente, como a equipe pretende
+investigar e corrigir os defeitos revelados pelos testes, e não apenas como
+os testes serão executados.}
+
+A depuração começa onde o teste termina: um caso de teste que falha aponta
+um sintoma, não necessariamente a causa, e conectar os dois é o trabalho de
+depurar. A equipe evita a depuração por força bruta --- inundar o código de
+instruções de saída na esperança de tropeçar na causa --- em favor da
+eliminação de causa: formular uma hipótese específica sobre a origem do
+defeito a partir do sintoma e do caso de teste que o revelou, e usar o
+depurador para confirmá-la ou descartá-la antes de alterar qualquer linha.
+Como a equipe não conta com um grupo de teste independente, a revisão de
+\textit{pull request} cumpre também esse papel na depuração: o revisor, por
+não ter escrito a correção, tem mais chance de perceber quando ela é
+sintomática demais e mascara a causa real.
+
+Antes de integrar uma correção, a equipe responde às três perguntas que Van
+Vleck propõe para qualquer defeito: a causa se repete em outro ponto do
+sistema? Que novo defeito essa correção pode introduzir? O que teria evitado
+esse defeito desde o início? É a terceira pergunta que efetivamente muda o
+processo: quando a resposta aponta para a ausência de um teste, esse teste é
+escrito antes do \textit{merge}, não depois, para que o mesmo defeito não
+precise ser depurado duas vezes.
+
+\section{Automação e ferramentas}\label{sec:automacao-ferramentas}
 
 \orientacao{Descrevam as ferramentas utilizadas ou planejadas para executar
 testes, gerar relatórios e, quando aplicável, automatizar sua execução.}
+
+A Tabela~\ref{tab:ferramentas-teste} resume as ferramentas planejadas por
+nível de teste.
+
+\begin{table}[ht]
+\centering
+\caption{Ferramentas planejadas por nível de teste.}
+\label{tab:ferramentas-teste}
+\begin{tabularx}{0.95\textwidth}{p{0.26\textwidth} X}
+\toprule
+\textbf{Nível} & \textbf{Ferramentas} \\
+\midrule
+Unidade (\textit{frontend}/API) & Vitest e React Testing Library no
+\textit{frontend}; Vitest e \textit{mocks} manuais das interfaces de domínio
+na API. \\
+Unidade (serviços Python) & pytest; Hypothesis para os testes baseados em
+propriedades do cálculo do CA. \\
+Integração & Supertest contra a API, com PostgreSQL efêmero subido pela
+esteira (Tabela~\ref{tab:ci}); \textit{stubs} dos serviços de IA para os
+cenários de falha que seriam caros de reproduzir de verdade (ex.\ currículo
+corrompido). \\
+Contrato & Verificação de esquema (JSON Schema) da entrada e saída de
+\texttt{IIAGeradoraService} e \texttt{INotificadorService}, executada contra
+qualquer implementação candidata antes de ela substituir a atual. \\
+Sistema / aceitação & Playwright, cobrindo os fluxos principais e
+alternativos de UC-01, UC-02 e UC-03 em navegador real. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Além dos níveis clássicos, um \textit{script} agendado cobre o que é
+específico do componente de IA e não se encaixa nas categorias tradicionais
+de teste de sistema da Seção~\ref{sec:teste-sistema}: depois de cada
+re-treinamento semanal da IA (História RIA-03), ele compara a distribuição
+de CA gerada pelo modelo novo contra a do modelo anterior para o mesmo
+conjunto de colaboradores de teste, e alerta se a mudança ultrapassar um
+limiar. O objetivo é pegar uma regressão de qualidade antes que ela afete
+equipes reais. O mesmo \textit{script} gera equipes variando apenas um
+atributo pessoal do colaborador (mantendo habilidades e desempenho
+idênticos) e verifica se o CA muda. A Seção de Escopo do Capítulo 1 já deixa
+qualquer decisão automática de contratação, promoção ou desligamento fora do
+sistema; este teste é a contrapartida técnica dessa decisão: ele não decide
+se um viés existe, mas garante que, se existir, ele seja visível antes de
+chegar ao gestor.
+
+Por fim, os relatórios de teste seguem o mesmo princípio de rastreabilidade
+do Capítulo~\ref{cha:configuracao}: o relatório de cobertura é publicado
+como comentário no \textit{pull request} (Tabela~\ref{tab:ci}), e os
+resultados dos testes de sistema (Seção~\ref{sec:teste-sistema}) e dos
+\textit{scripts} desta seção são anexados à \textit{release}
+correspondente, junto às notas de versão. Assim, para qualquer versão
+entregue, é possível responder não só o que mudou, mas também o que foi
+verificado antes de mudar.
 
 % ============================================================================
 %\chapter{Visão de Implantação}
@@ -650,8 +1090,8 @@ outra pessoa consiga mexer naquele código depois.
 Duas ferramentas sustentam esse controle. O \textbf{GitHub} hospeda o
 repositório, as revisões de código, a documentação de apoio e as automações. O
 \textbf{Taiga.io}, já adotado pela equipe como quadro Scrumban, organiza o
-trabalho. A ligação entre as duas é o que fecha a cadeia de rastreabilidade
-descrita na Seção~\ref{sec:rastreabilidade}.
+trabalho e hospeda a wiki do projeto. A ligação entre as duas é o que fecha a
+cadeia de rastreabilidade descrita na Seção~\ref{sec:rastreabilidade}.
 
 \section{Repositório e itens de configuração}
 
@@ -709,8 +1149,8 @@ Automações & Fluxos de trabalho do GitHub Actions em
 Documentação de projeto & Este documento (fonte \LaTeX, \texttt{refs.bib} e
 imagens), \texttt{README.md} e os diagramas C4 e UML em formato editável, e não
 apenas exportados como imagem. \\
-Wiki do projeto & Guia de uso do sistema e guia de contribuição, versionados no
-repositório de wiki do GitHub. \\
+Wiki do projeto & Guia de uso do sistema e guia de contribuição, mantidos na
+wiki nativa do Taiga.io, com histórico de páginas. \\
 Parametrização do modelo de IA & Critérios de formação, hiperparâmetros e
 identificador da versão do modelo em uso, em arquivo de configuração
 versionado. \\
@@ -718,7 +1158,7 @@ versionado. \\
 \end{tabularx}
 \end{table}
 
-\subsection*{Documentação em três camadas}
+\subsection{Documentação em três camadas}
 
 A equipe trata documentação como um item de configuração em três níveis, cada
 um respondendo a uma pergunta diferente e mantido em um lugar diferente.
@@ -739,7 +1179,7 @@ parâmetro significa, o que é devolvido e em que condições o método falha. �
 essa camada que faz uma abstração como \texttt{IIAGeradoraService} ser
 utilizável por quem não escreveu a implementação por trás dela.
 
-A \textbf{wiki do projeto}, hospedada no próprio GitHub, responde \textbf{como}
+A \textbf{wiki do projeto}, hospedada no próprio Taiga.io, responde \textbf{como}
 fazer as coisas, e é a camada que mais muda. Ela tem duas partes. A primeira é
 o guia de uso, escrito para o gestor de RH: como cadastrar colaboradores,
 importar currículos, solicitar a formação de uma equipe, interpretar o
@@ -769,7 +1209,7 @@ Escrever o padrão reduz o tempo que um novo integrante leva para produzir
 código consistente com o resto e diminui a quantidade de discussão repetida nas
 revisões, que passam a se concentrar na lógica em vez da forma.
 
-\subsection*{O que fica fora do repositório}
+\subsection{O que fica fora do repositório}
 
 Três categorias de artefato são deliberadamente mantidas fora do controle de
 versão. Os \textbf{segredos}, como senhas de banco, chaves de API e o segredo de
@@ -793,7 +1233,7 @@ versão do modelo; o arquivo de pesos correspondente é publicado como anexo de
 uma \textit{release}. Assim continua sendo possível dizer, para qualquer versão
 do software em uso, qual modelo ela estava executando.
 
-\subsection*{Organização de \textit{branches} e versões}
+\subsection{Organização de \textit{branches} e versões}
 
 A equipe trabalha com \textit{branches} curtos sobre a \textit{branch}
 principal. A \texttt{main} contém apenas código integrado e aprovado pela
@@ -935,8 +1375,8 @@ originou.
 \toprule
 \textbf{Artefato} & \textbf{Exemplo 1} & \textbf{Exemplo 2} \\
 \midrule
-Requisito & RF04 --- troca manual de membros com registro de
-\textit{feedback} & RNF01 --- senhas armazenadas de forma criptografada \\
+Requisito & RF04: troca manual de membros com registro de
+\textit{feedback} & RNF01: senhas armazenadas de forma criptografada \\
 História / \textit{issue} & História \textit{Troca manual de membros}
 (\textit{Sprint} 1) & \textit{Issue} aberta na revisão de segurança, espelhada
 no Taiga \\
@@ -965,7 +1405,7 @@ entrega/\textit{deploy}, apresentem o fluxo adotado e as ferramentas
 envolvidas. Caso essas práticas não sejam utilizadas, expliquem brevemente
 como o processo é realizado manualmente.}
 
-\subsection*{Construção local}
+\subsection{Construção local}
 
 O sistema é composto por quatro processos e um banco de dados, cada um com suas
 próprias exigências de versão de tempo de execução, de bibliotecas nativas e de
@@ -1000,11 +1440,11 @@ A mesma base de código é construída de duas formas diferentes, conforme o
 objetivo. Não são dois softwares, e sim duas configurações de construção:
 
 \begin{itemize}[nosep]
-    \item \textbf{Desenvolvimento} --- prioriza o tempo de retorno. O código
+    \item \textbf{Desenvolvimento}: prioriza o tempo de retorno. O código
     não é minificado, os \textit{source maps} são preservados, o servidor
     recarrega automaticamente a cada alteração, o nível de registro é detalhado
     e a base é populada com dados sintéticos.
-    \item \textbf{Produção} --- prioriza desempenho e segurança. O
+    \item \textbf{Produção}: prioriza desempenho e segurança. O
     \textit{frontend} é compilado e minificado em arquivos estáticos, o
     TypeScript é transpilado antecipadamente, as dependências de
     desenvolvimento ficam fora da imagem final, o registro detalhado é
@@ -1016,7 +1456,7 @@ Em nenhum dos casos há configuração específica de ambiente escrita no códig
 que muda são variáveis de ambiente, de modo que a mesma imagem verificada pela
 automação é a que roda para o cliente.
 
-\subsection*{Integração contínua}
+\subsection{Integração contínua}
 
 A verificação automatizada roda no GitHub Actions e é acionada em duas
 situações: a cada \textit{push} em um \textit{branch} de trabalho e a cada
@@ -1067,7 +1507,7 @@ ser explicado e se a alteração respeita a organização de módulos descrita n
 wiki, fica com o revisor. É essa divisão que mantém a revisão de código focada
 em decisões de projeto.
 
-\subsection*{Ambientes e entrega}
+\subsection{Ambientes e entrega}
 
 O software passa por três ambientes até chegar ao usuário. O de
 \textbf{desenvolvimento} é a máquina de cada integrante, levantada pelo
