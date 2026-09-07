@@ -29,6 +29,35 @@
 \usepackage{natbib}
 \usepackage{fancyhdr}
 \usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{needspace}
+
+% ----------------------------------------------------------------------------
+% Estilo para trechos de código (usado no Capítulo de Projeto de Componentes)
+% ----------------------------------------------------------------------------
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    frame=single,
+    rulecolor=\color{gray!40},
+    captionpos=b,
+    xleftmargin=1em,
+    aboveskip=1em,
+    belowskip=1em,
+    extendedchars=true,
+    literate=%
+        {á}{{\'a}}1 {à}{{\`a}}1 {â}{{\^a}}1 {ã}{{\~a}}1
+        {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1 {ó}{{\'o}}1
+        {ô}{{\^o}}1 {õ}{{\~o}}1 {ú}{{\'u}}1 {ü}{{\"u}}1
+        {ç}{{\c c}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Ç}{{\c C}}1,
+}
+
+% Folga extra para nomes longos de classe em \texttt não estourarem a margem.
+\setlength{\emergencystretch}{3em}
 
 \hypersetup{
     hidelinks,
@@ -605,6 +634,24 @@ Incluam apenas restrições efetivamente relevantes ao projeto.}
 sistema. O projeto de componentes pode ser representado graficamente,
 textualmente ou por tabelas, de acordo com a natureza da solução.}
 
+% TODO(grupo): confirmar com o Cap.~\ref{cha:arquitetura} (Arquitetura), ainda em
+% aberto, a fronteira entre o nível de componente do C4 (lá) e o detalhamento
+% interno das classes (aqui), para não repetir nem deixar lacuna.
+% TODO(grupo): os materiais de apresentação trazem duas grafias do domínio ---
+% uma em TypeScript (GerenciadorDeEquipes, IEquipeRepository, IIAGeradoraService)
+% e uma em Python (GeradorEquipes, IRepositorioEquipe, IAvaliadorEquipe). Este
+% capítulo adota a versão TypeScript como canônica, por ser a que a nota do
+% projeto e o Cap.~\ref{cha:testes} já usam. Alinhar os diagramas exportados a
+% essa grafia antes da entrega.
+
+Enquanto o Capítulo~\ref{cha:arquitetura} apresenta a decomposição do RANK-IA em
+processos (\textit{frontend}, API, serviços de IA e banco), este capítulo desce
+ao interior do componente que concentra a regra de negócio: o módulo de equipes,
+onde vivem a geração automática, o cálculo do Coeficiente de Aproveitamento e o
+versionamento das equipes. O foco recai sobre esse módulo porque é ali que estão
+as decisões de projeto de maior impacto na manutenibilidade prometida como
+objetivo de qualidade na Seção~\ref{sec:quality-goals}.
+
 \section{Visão geral dos componentes}
 
 \orientacao{Listem os principais componentes e suas responsabilidades. Para
@@ -612,18 +659,49 @@ sistemas maiores, esta visão geral pode cobrir todos os componentes, enquanto
 o detalhamento das seções seguintes pode se concentrar apenas nos mais
 relevantes ou complexos.}
 
-\begin{table}[ht]
+A Tabela~\ref{tab:componentes} reúne os componentes do módulo de equipes e suas
+responsabilidades. A separação segue uma diretriz única: cada componente tem um,
+e apenas um, motivo para mudar --- a lógica de negócio, a persistência, a
+comunicação com a IA e a notificação são responsabilidades distintas, alocadas a
+componentes distintos.
+
+\begin{table}[H]
 \centering
-\caption{Principais componentes do sistema.}
-\begin{tabularx}{0.95\textwidth}{p{0.28\textwidth} X}
+\caption{Principais componentes do módulo de equipes.}
+\label{tab:componentes}
+\begin{tabularx}{0.95\textwidth}{p{0.30\textwidth} X}
 \toprule
 \textbf{Componente} & \textbf{Responsabilidade principal} \\
 \midrule
-Componente A & Descrever sua responsabilidade principal. \\
-Componente B & Descrever sua responsabilidade principal. \\
+\texttt{GerenciadorDeEquipes} & Orquestra o caso de uso de geração: coordena IA,
+persistência e notificação, sem executar nenhuma dessas tarefas diretamente. \\
+\texttt{GeradorEquipes} & Aplica o modelo e os critérios para formar a equipe a
+partir dos colaboradores elegíveis. É o núcleo do domínio. \\
+\texttt{ModeloRL} & Encapsula os pesos e hiperparâmetros do algoritmo de
+aprendizado e expõe as operações de predição e treinamento. \\
+\texttt{CriterioFormacao} & Define parâmetros e requisitos da equipe (tamanho,
+habilidades exigidas, peso da experiência). \\
+\texttt{CoeficienteAproveitamento} & Calcula e expõe a métrica de qualidade da
+equipe gerada (RN05). \\
+\texttt{HistoricoAjustes} & Registra os ajustes manuais do gestor para
+retroalimentar o modelo (RN07). \\
+\texttt{EquipeRepository} & Persiste e recupera equipes; isola o domínio da
+tecnologia de banco (implementa \texttt{IEquipeRepository}). \\
+\texttt{IAGeradoraServiceClient} & Comunica-se com o serviço externo de IA
+(implementa \texttt{IIAGeradoraService}). \\
+\texttt{EmailNotificadorService} & Notifica os membros de uma equipe formada
+(implementa \texttt{INotificadorService}). \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+As entidades de domínio \texttt{Equipe}, \texttt{Colaborador} e \texttt{Gestor}
+(estas duas especializando \texttt{Usuario}) são os dados manipulados por esses
+componentes e aparecem no diagrama de classes da seção seguinte.
+
+% Mantém a Tabela 3.1 confinada à seção 3.1, antes das figuras da 3.2,
+% preservando a ordem de leitura tabela -> figuras.
+\FloatBarrier
 
 \section{Detalhamento dos componentes principais}
 
@@ -632,6 +710,48 @@ apresentem sua estrutura, responsabilidades, interfaces e dependências.
 Se o projeto for orientado a objetos, utilizem principalmente diagramas de
 classes UML e, quando necessário, complementem-nos com diagramas de sequência,
 atividade ou outros artefatos.}
+
+% NOTA(grupo): diagrama gerado com Mermaid; fonte em
+% projeto/diagramas/diagrama-classes-dominio.mmd (reeditar lá e reexportar).
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.56\textheight]{diagrama-classes-dominio.png}
+    \caption{Diagrama de classes do módulo de equipes.}
+    \label{fig:classes-dominio}
+\end{figure}
+
+O diagrama de classes do domínio (Figura~\ref{fig:classes-dominio})
+organiza-se em torno de \texttt{Equipe}, que agrega de um a muitos \texttt{Colaborador} e
+carrega o \texttt{CoeficienteAproveitamento} calculado. O \texttt{Gestor} dispara
+a geração e registra ajustes; o \texttt{Colaborador} consulta seu perfil e seus
+treinamentos.
+
+O componente central é o \texttt{GeradorEquipes} --- o ``coração do sistema'',
+responsável por receber os colaboradores, aplicar o modelo e devolver uma equipe
+com seu coeficiente. Ele se relaciona com quatro colaboradores diretos:
+\textit{usa} um \texttt{ModeloRL} para predizer a composição, é \textit{configurado}
+por um \texttt{CriterioFormacao}, \textit{gera} um \texttt{CoeficienteAproveitamento}
+e \textit{registra} mudanças em um \texttt{HistoricoAjustes}. A
+Figura~\ref{fig:classes-gerador} detalha essas quatro relações.
+
+% NOTA(grupo): fonte em projeto/diagramas/diagrama-classes-gerador.mmd
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{diagrama-classes-gerador.png}
+    \caption{Detalhamento do componente central \texttt{GeradorEquipes} e suas dependências.}
+    \label{fig:classes-gerador}
+\end{figure}
+
+O acesso do \texttt{GerenciadorDeEquipes} aos recursos externos ocorre sempre por
+meio de três interfaces, e nunca de classes concretas:
+\texttt{IEquipeRepository} (persistência), \texttt{IIAGeradoraService} (geração
+por IA) e \texttt{INotificadorService} (notificação). É essa fronteira de
+abstrações que torna o módulo testável com \textit{mocks}, conforme detalhado na
+Seção~\ref{sec:validacao} do Capítulo~\ref{cha:testes}.
+
+% Confina as figuras 3.1 e 3.2 a esta seção: impede que um float atrasado
+% caia dentro dos blocos de código da seção seguinte.
+\FloatBarrier
 
 \section{Princípios de projeto}
 
@@ -643,6 +763,78 @@ atividade ou outros artefatos.}
 	projeto ajudaram a resolver. Para evidenciar sua aplicação, utilizem, quando
 	adequado, diagramas de classes ou trechos de código-fonte.}
 
+\subsection{Responsabilidade única (SRP)}
+
+O ponto de partida do projeto foi evitar a \textit{God Class}: uma única
+\texttt{GerenciadorDeEquipes} que gerasse a equipe, persistisse no banco, enviasse
+e-mail e chamasse a IA. Nessa forma, qualquer mudança em persistência, e-mail ou
+IA obrigaria a editar a classe de negócio, com alto risco de regressão. O
+Trecho~\ref{lst:srp-antes} mostra o problema.
+
+% Mantém o trecho inteiro numa única página (não o divide entre páginas).
+\needspace{5cm}
+\begin{lstlisting}[language=Java,caption={Antes: uma classe com quatro motivos para mudar.},label={lst:srp-antes}]
+class GerenciadorDeEquipes {
+    async criarEquipe(dados: any) {
+        const equipe = new Equipe(dados)          // negócio
+        await this.db.query(`INSERT INTO ...`)    // persistência
+        await transport.sendMail({ ... })         // e-mail
+        const res = await fetch('http://ia/gerar')// IA
+        return equipe
+    }
+}
+\end{lstlisting}
+
+A solução distribui cada responsabilidade a um componente próprio
+(Tabela~\ref{tab:componentes}): o \texttt{GerenciadorDeEquipes} apenas coordena e
+delega, o \texttt{EquipeRepository} persiste, o \texttt{EmailNotificadorService}
+notifica e o \texttt{IAGeradoraServiceClient} fala com a IA. O benefício é
+concreto: trocar PostgreSQL por outro banco, ou e-mail por SMS, passa a afetar um
+único componente.
+
+\subsection{Inversão de dependência (DIP)}
+
+O \texttt{GerenciadorDeEquipes} depende de abstrações, não de implementações. As
+dependências chegam pelo construtor (injeção de dependência), tipadas pelas
+interfaces \texttt{IEquipeRepository}, \texttt{IIAGeradoraService} e
+\texttt{INotificadorService}, como no Trecho~\ref{lst:dip}.
+
+\needspace{8cm}
+\begin{lstlisting}[language=Java,caption={Depois: negócio dependendo de abstrações.},label={lst:dip}]
+class GerenciadorDeEquipes {
+    constructor(
+        private repo: IEquipeRepository,
+        private ia: IIAGeradoraService,
+        private notif: INotificadorService,
+    ) {}
+
+    async criarEquipe(dados: DadosEquipe) {
+        const sugestao = await this.ia.gerarEquipe(dados)
+        const equipe = Equipe.fromSugestao(sugestao)
+        await this.repo.save(equipe)
+        for (const m of equipe.getMembros())
+            await this.notif.notificarMembro(m, equipe)
+        return equipe
+    }
+}
+\end{lstlisting}
+
+Esse é o princípio que sustenta duas promessas feitas em outros capítulos: a
+substituibilidade do modelo de IA (RNF07) e a testabilidade por \textit{mocks} do
+Capítulo~\ref{cha:testes}. Sem depender de abstrações, ambas ficariam apenas na
+intenção.
+
+\subsection{Coesão e acoplamento}
+
+Os componentes do módulo de equipes exibem \textbf{alta coesão} --- cada um reúne
+o que muda pelo mesmo motivo --- e \textbf{baixo acoplamento} --- comunicam-se por
+interfaces estreitas, não por dependências concretas. A modularização por coesão
+mantém no mesmo módulo (\texttt{src/equipes/}) tudo o que uma mudança de regra de
+equipe tende a tocar, reduzindo o efeito de propagação de uma alteração.
+
+% TODO(grupo): se sobrar espaço, incluir uma frase sobre LSP (AvaliadorIA e um
+% fallback por regras são substituíveis sob a mesma interface) e ISP (interfaces
+% mínimas e separadas), fechando os cinco princípios SOLID.
 
 \section{Padrões de projeto}
 
@@ -650,6 +842,37 @@ atividade ou outros artefatos.}
 problema que motivou sua aplicação, as classes ou componentes participantes,
 como o padrão foi aplicado e qual benefício se espera obter. Não utilizem
 padrões apenas para preencher esta seção.}
+
+Três padrões foram efetivamente aplicados no módulo de equipes, todos motivados
+por problemas reais de projeto --- e não pela vontade de exibir padrões. A
+Tabela~\ref{tab:padroes} os resume.
+
+\begin{table}[ht]
+\centering
+\caption{Padrões de projeto aplicados no módulo de equipes.}
+\label{tab:padroes}
+\begin{tabularx}{0.95\textwidth}{p{0.16\textwidth} p{0.26\textwidth} X}
+\toprule
+\textbf{Padrão} & \textbf{Problema / participantes} & \textbf{Benefício} \\
+\midrule
+\textit{Repository} & Isolar o domínio da tecnologia de persistência.
+\texttt{IEquipeRepository} $\rightarrow$ \texttt{EquipeRepository}. & Trocar o
+banco sem tocar na lógica de negócio; testar o domínio sem banco real. \\
+\textit{Strategy} & Permitir mais de uma forma de gerar/avaliar equipes sob um
+mesmo contrato. \texttt{IIAGeradoraService}, com implementação por IA e um
+\textit{fallback} por regras. & Substituir o modelo de IA (RNF07) e degradar para
+regras quando o serviço falha, sem alterar o chamador. \\
+\textit{Dependency Injection} & Fornecer as dependências ao
+\texttt{GerenciadorDeEquipes} de fora, em vez de instanciá-las internamente. &
+Baixo acoplamento e testabilidade; base concreta do DIP. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% TODO(grupo): confirmar se o "fallback por regras" (AvaliadorRegras nos slides
+% em Python) entra de fato no escopo do RANK-IA ou se é apenas ilustrativo. Se
+% não entrar, descrever o Strategy só como a troca entre implementações da
+% IIAGeradoraService, sem o fallback.
 
 % ============================================================================
 \chapter{Projeto de Interface do Usuário}

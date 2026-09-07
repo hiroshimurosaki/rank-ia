@@ -1,0 +1,57 @@
+classDiagram
+    direction TB
+
+    class Usuario {
+        -id : UUID
+        -nome : str
+        -email : str
+        -senha_hash : str
+        +autenticar() bool
+    }
+
+    class Colaborador {
+        -habilidades : List~str~
+        -experiencias : List~str~
+        -gaps : List~str~
+        -historico : List
+        +consultarPerfil() Perfil
+        +verTreinamentos() List
+    }
+
+    class Gestor {
+        -departamento : str
+        -nivel_acesso : int
+        +gerarEquipe() Equipe
+        +ajustarEquipe() void
+        +gerarRelatorio() Relatorio
+    }
+
+    class Equipe {
+        -id : UUID
+        -membros : List~Colaborador~
+        -coeficiente : float
+        -versao : int
+        +calcularCoeficiente() float
+        +adicionarMembro() void
+    }
+
+    class GeradorEquipes {
+        -modeloRL : ModeloRL
+        -criterios : List
+        +gerar(colab) Equipe
+        +treinarModelo() void
+        +avaliarEquipe() float
+    }
+
+    class Relatorio {
+        -dados : dict
+        -periodo : DateRange
+        +exportar() PDF
+        +visualizar() JSON
+    }
+
+    Usuario <|-- Colaborador
+    Usuario <|-- Gestor
+    Equipe "1" o-- "1..*" Colaborador : membros
+    Equipe ..> Relatorio : gera
+    Gestor ..> GeradorEquipes : aciona

@@ -1,0 +1,47 @@
+classDiagram
+    direction LR
+
+    class ModeloRL {
+        -pesos : ndarray
+        -epsilon : float
+        -versao : int
+        +treinar(dados) void
+        +predizer(input) Equipe
+    }
+
+    class CriterioFormacao {
+        -tamanhoEquipe : int
+        -habilidadesReq : List
+        -pesoExperiencia : float
+        +validar() bool
+    }
+
+    class GeradorEquipes {
+        -modeloRL : ModeloRL
+        -criterios : List~Criterio~
+        -historico : HistoricoAjustes
+        +gerar(colab) Equipe
+        +treinarModelo(fb) void
+        +avaliarEquipe(eq) float
+        +aplicarFeedback() void
+    }
+
+    class HistoricoAjustes {
+        -ajustes : List~Ajuste~
+        -data : datetime
+        -gestorId : UUID
+        +registrar(aj) void
+        +exportarFeedback() dict
+    }
+
+    class CoeficienteAproveitamento {
+        -valor : float
+        -metricas : dict
+        +calcular(equipe) float
+        +exibir() str
+    }
+
+    GeradorEquipes ..> ModeloRL : usa
+    CriterioFormacao ..> GeradorEquipes : config
+    GeradorEquipes ..> HistoricoAjustes : registra
+    GeradorEquipes ..> CoeficienteAproveitamento : gera
