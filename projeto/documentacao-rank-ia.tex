@@ -56,6 +56,19 @@
         {ç}{{\c c}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Ç}{{\c C}}1,
 }
 
+% Linguagem TypeScript para o listings (não é embutida no pacote).
+\lstdefinelanguage{TypeScript}{
+    morekeywords={async, await, const, let, var, function, class, interface,
+        extends, implements, private, public, protected, readonly, constructor,
+        return, new, for, of, in, if, else, this, import, export, from, type,
+        void, boolean, number, string, any, null, undefined},
+    sensitive=true,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]",
+}
+
 % Folga extra para nomes longos de classe em \texttt não estourarem a margem.
 \setlength{\emergencystretch}{3em}
 
@@ -72,7 +85,7 @@
 % ----------------------------------------------------------------------------
 % Troquem para \orientacoesfalse antes de gerar a versão final para entrega.
 \newif\iforientacoes
-\orientacoestrue
+\orientacoesfalse
 
 \newcommand{\orientacao}[1]{%
     \iforientacoes
@@ -249,7 +262,7 @@ Tabela~\ref{tab:stakeholders}.
 \toprule
 \textbf{Parte interessada} & \textbf{Tipo} & \textbf{Interesse no sistema} \\
 \midrule
-Gestor / RH & Usuário primário & Cadastrar colaboradores, parametrizar os
+Gestor/RH & Usuário primário & Cadastrar colaboradores, parametrizar os
 critérios da IA, solicitar e validar equipes, acompanhar relatórios. Possui
 acesso total ao sistema. \\
 Colaborador & Usuário secundário & Consultar as próprias competências e
@@ -595,7 +608,7 @@ Cada estilo adotado responde a um objetivo de qualidade priorizado na
 Seção~\ref{sec:quality-goals}, e cada decisão registrada na Seção~\ref{sec:decisoes} 
 pode ser lida como a resposta a um requisito, uma restrição legal ou o tamanho da equipe.
 
-A descrição segue o modelo C4, em seus três primeiros níveis:
+A descrição segue o modelo C4~\citep{c4model}, em seus três primeiros níveis:
 contexto, contêineres e componentes. O quarto nível, que detalha a
 implementação de um componente em classes, é tratado no
 Capítulo~\ref{cha:componentes}, junto com os princípios e padrões de projeto
@@ -1045,7 +1058,8 @@ que o Capítulo~\ref{cha:arquitetura} atribuiu à API
 o \emph{Registro de Histórico e Versões}; o \texttt{EquipeRepository}, o
 \emph{Repositório de Dados}; o \texttt{EmailNotificadorService}, o
 \emph{Notificador}; e o \texttt{IAGeradoraServiceClient}, o \emph{Cliente de
-Integração IA}. Já o \texttt{GeradorEquipes} e o \texttt{ModeloRL} não pertencem à
+Integração IA}. Já o \texttt{GeradorEquipes}, o \texttt{ModeloRL} e o
+\texttt{CriterioFormacao} não pertencem à
 API: são a estrutura interna do serviço \emph{IA Geradora de Equipes} em Python,
 alcançado pela API somente através da interface \texttt{IIAGeradoraService}.
 
@@ -1128,7 +1142,7 @@ serviço de IA em Python; o \texttt{CoeficienteAproveitamento} e o
 \texttt{CoeficienteAproveitamento}'' se concretiza na API --- o serviço de IA usa a
 fórmula como função objetivo, mas o valor exibido e persistido é sempre recalculado
 pela API (decisão~D5) ---, e ``registra em \texttt{HistoricoAjustes}'' também
-ocorre na API, único contêiner com acesso ao banco (decisão~D4). O
+ocorre na API, único contêiner com acesso ao banco (decisões~D3 e~D4). O
 \texttt{GerenciadorDeEquipes} é quem costura esses passos através da interface
 \texttt{IIAGeradoraService}.
 
@@ -1149,8 +1163,8 @@ O acesso do \texttt{GerenciadorDeEquipes} aos recursos externos ocorre sempre po
 meio de três interfaces, e nunca de classes concretas:
 \texttt{IEquipeRepository} (persistência), \texttt{IIAGeradoraService} (geração
 por IA) e \texttt{INotificadorService} (notificação). É essa fronteira de
-abstrações que torna o módulo testável com \textit{mocks}, conforme detalhado na
-Seção~\ref{sec:validacao} do Capítulo~\ref{cha:testes}.
+abstrações que torna o módulo testável com \textit{mocks}, conforme detalhado no
+Capítulo~\ref{cha:testes}.
 
 % Confina as figuras 3.1 e 3.2 a esta seção: impede que um float atrasado
 % caia dentro dos blocos de código da seção seguinte.
@@ -1176,7 +1190,7 @@ Trecho~\ref{lst:srp-antes} mostra o problema.
 
 % Mantém o trecho inteiro numa única página (não o divide entre páginas).
 \needspace{5cm}
-\begin{lstlisting}[language=Java,caption={Antes: uma classe com quatro motivos para mudar.},label={lst:srp-antes}]
+\begin{lstlisting}[language=TypeScript,caption={Antes: uma classe com quatro motivos para mudar.},label={lst:srp-antes}]
 class GerenciadorDeEquipes {
     async criarEquipe(dados: any) {
         const equipe = new Equipe(dados)          // negócio
@@ -1203,7 +1217,7 @@ interfaces \texttt{IEquipeRepository}, \texttt{IIAGeradoraService} e
 \texttt{INotificadorService}, como no Trecho~\ref{lst:dip}.
 
 \needspace{8cm}
-\begin{lstlisting}[language=Java,caption={Depois: negócio dependendo de abstrações.},label={lst:dip}]
+\begin{lstlisting}[language=TypeScript,caption={Depois: negócio dependendo de abstrações.},label={lst:dip}]
 class GerenciadorDeEquipes {
     constructor(
         private repo: IEquipeRepository,
@@ -1287,9 +1301,6 @@ usuário com o sistema. O principal artefato pode ser constituído por
 protótipos de baixa ou alta fidelidade. Diagramas de atividade, fluxos de
 navegação ou outros artefatos podem complementar a explicação.}
 
-Não é necessário apresentar todas as telas. Priorizem as interfaces e os
-fluxos mais importantes para compreender o funcionamento do sistema.
-
 \orientacao{Para cada fluxo principal, expliquem brevemente a tarefa do
 usuário e as decisões de interface relevantes. Se a equipe utilizar uma
 ferramenta externa, como Figma, apresentem exemplos representativos neste
@@ -1310,17 +1321,17 @@ dos perfis de usuário definidos para o sistema:
 \\
 \begin{itemize}[nosep]
 
-\item \textbf{Aplicação web e compatibilidade (RNF-06 e RNF-08):} o RANK-IA é desenvolvido como uma aplicação web e deve funcionar corretamente nos ambientes previstos no projeto. Dessa forma, a interface foi pensada para utilização em navegadores e para manter seu funcionamento nas plataformas Windows, Linux e macOS. Também foi considerada a resolução mínima de tela estabelecida pelo RNF-06, de modo que os principais elementos da interface permaneçam acessíveis e organizados.
+\item \textbf{Aplicação web e compatibilidade (RNF06 e RNF08):} o RANK-IA é desenvolvido como uma aplicação web e deve funcionar corretamente nos ambientes previstos no projeto. Dessa forma, a interface foi pensada para utilização em navegadores e para manter seu funcionamento nas plataformas Windows, Linux e macOS. Também foi considerada a resolução mínima de tela estabelecida pelo RNF06, de modo que os principais elementos da interface permaneçam acessíveis e organizados.
 
-\item \textbf{Acesso de acordo com o perfil (RF07 e RN04):} o sistema possui dois perfis principais de usuário, Gestor / RH e Colaborador, com diferentes níveis de acesso. O Gestor / RH possui acesso às funcionalidades de gerenciamento de colaboradores, formação de equipes e relatórios, enquanto o Colaborador possui acesso restrito às próprias informações, às equipes das quais participa e às recomendações de treinamento. Assim, a navegação e as funcionalidades apresentadas pela interface devem ser compatíveis com as permissões do usuário autenticado.
+\item \textbf{Acesso de acordo com o perfil (RF07 e RN04):} o sistema possui dois perfis principais de usuário, Gestor/RH e Colaborador, com diferentes níveis de acesso. O Gestor/RH possui acesso às funcionalidades de gerenciamento de colaboradores, formação de equipes e relatórios, enquanto o Colaborador possui acesso restrito às próprias informações, às equipes das quais participa e às recomendações de treinamento. Assim, a navegação e as funcionalidades apresentadas pela interface devem ser compatíveis com as permissões do usuário autenticado.
 
 \item \textbf{Clareza das informações utilizadas na formação de equipes (RF03, RN05 e RIA-04):} o Coeficiente de Aproveitamento (CA) é utilizado como indicador da qualidade das equipes formadas. Por esse motivo, a composição das equipes e seu respectivo CA devem receber destaque na interface, permitindo que o usuário compreenda a sugestão apresentada e compare diferentes possibilidades de formação. As informações relevantes para a decisão, como integrantes e competências, devem ser apresentadas de maneira conjunta sempre que necessário.
 
-\item \textbf{Controle do usuário sobre as sugestões da IA (RF04, RN03, UC-02 e UC-03):} a geração automática de equipes tem como objetivo apoiar a decisão do usuário, e não substituí-la. O Gestor / RH deve poder analisar a sugestão produzida pela IA, realizar alterações na composição da equipe e confirmar o resultado final. A interface deve, portanto, tornar as possibilidades de ajuste acessíveis e apresentar as consequências da alteração, especialmente em relação ao CA. Além disso, os ajustes realizados devem ser registrados conforme estabelecido pela RN03.
+\item \textbf{Controle do usuário sobre as sugestões da IA (RF04, RN03, UC-02 e UC-03):} a geração automática de equipes tem como objetivo apoiar a decisão do usuário, e não substituí-la. O Gestor/RH deve poder analisar a sugestão produzida pela IA, realizar alterações na composição da equipe e confirmar o resultado final. A interface deve, portanto, tornar as possibilidades de ajuste acessíveis e apresentar as consequências da alteração, especialmente em relação ao CA. Além disso, os ajustes realizados devem ser registrados conforme estabelecido pela RN03.
 
-\item \textbf{Usabilidade e redução do esforço durante as tarefas (RNF-05):} o RNF-05 estabelece que a interface deve ser utilizável por gestores sem treinamento especializado e que uma alteração manual na equipe deve poder ser realizada rapidamente. Por isso, as etapas do fluxo de formação foram mantidas objetivas, com informações necessárias apresentadas no momento da decisão e com ações de ajuste concentradas na própria tela sempre que possível.
+\item \textbf{Usabilidade e redução do esforço durante as tarefas (RNF05):} o RNF05 estabelece que a interface deve ser utilizável por gestores sem treinamento especializado e que uma alteração manual na equipe deve poder ser realizada rapidamente. Por isso, as etapas do fluxo de formação foram mantidas objetivas, com informações necessárias apresentadas no momento da decisão e com ações de ajuste concentradas na própria tela sempre que possível.
 
-\item \textbf{Consistência da interface:} os elementos utilizados nas diferentes etapas do sistema devem manter padrões visuais e de interação semelhantes, especialmente nas telas autenticadas. Essa escolha busca reduzir a necessidade de reaprendizado entre diferentes partes do sistema e está relacionada às regras de ouro de Theo Mandel, particularmente às recomendações de manter a interface consistente, colocar o usuário no controle e reduzir a carga de memória necessária para utilização da interface \cite{mandel1997}.
+\item \textbf{Consistência da interface:} os elementos utilizados nas diferentes etapas do sistema devem manter padrões visuais e de interação semelhantes, especialmente nas telas autenticadas. Essa escolha busca reduzir a necessidade de reaprendizado entre diferentes partes do sistema e está relacionada às regras de ouro de Theo Mandel, particularmente às recomendações de manter a interface consistente, colocar o usuário no controle e reduzir a carga de memória necessária para utilização da interface \citep{mandel1997}.
 
 \end{itemize}
 
@@ -1334,19 +1345,19 @@ Foram selecionados quatro fluxos como representativos do funcionamento do sistem
 
 \subsection{Gerenciamento de colaboradores}
 
-O fluxo de gerenciamento de colaboradores está relacionado ao UC-01 e à RIA-01, envolvendo o cadastro e a manutenção das informações utilizadas pelo RANK-IA. O Gestor / RH pode inserir os dados manualmente ou utilizar um arquivo PDF, cuja leitura pode auxiliar no preenchimento das informações. Após o preenchimento, os dados devem ser revisados e validados pelo usuário.
+O fluxo de gerenciamento de colaboradores está relacionado ao UC-01 e à RIA-01, envolvendo o cadastro e a manutenção das informações utilizadas pelo RANK-IA. O Gestor/RH pode inserir os dados manualmente ou utilizar um arquivo PDF, cuja leitura pode auxiliar no preenchimento das informações. Após o preenchimento, os dados devem ser revisados e validados pelo usuário.
 
 Esse fluxo também considera as regras RN01 e RN02, que estabelecem a necessidade de manutenção periódica dos dados e determinam que somente colaboradores com informações completas participem da formação automática de equipes.
 
 \subsection{Geração de equipes por IA}
 
-O fluxo de geração de equipes está relacionado principalmente ao UC-02 e à RIA-04. Nele, o Gestor / RH define os critérios necessários para a formação, como objetivo da equipe, quantidade de integrantes, competências essenciais e peso atribuído à experiência.
+O fluxo de geração de equipes está relacionado principalmente ao UC-02 e à RIA-04. Nele, o Gestor/RH define os critérios necessários para a formação, como objetivo da equipe, quantidade de integrantes, competências essenciais e peso atribuído à experiência.
 
 Após o acionamento da geração, a IA apresenta uma ou mais sugestões de composição, acompanhadas do respectivo Coeficiente de Aproveitamento. A interface deve permitir que o usuário compreenda a composição sugerida e avalie sua adequação antes de decidir pela confirmação ou pelo ajuste manual da equipe.
 
 \subsection{Ajuste e validação manual da equipe}
 
-O fluxo de ajuste e validação corresponde principalmente ao UC-03 e à RIA-05. A partir de uma sugestão gerada pela IA, o Gestor / RH pode selecionar um integrante e visualizar outros colaboradores disponíveis para substituição.
+O fluxo de ajuste e validação corresponde principalmente ao UC-03 e à RIA-05. A partir de uma sugestão gerada pela IA, o Gestor/RH pode selecionar um integrante e visualizar outros colaboradores disponíveis para substituição.
 
 A interface deve apresentar as alternativas de maneira que o usuário consiga avaliar a alteração e seu possível impacto no CA. Depois da substituição, a nova composição deve ser atualizada e o usuário pode revisar a equipe antes de confirmá-la. Os ajustes realizados são registrados como feedback, conforme a RN03, e a equipe formada deve manter seu histórico de versões de acordo com a RN07.
 
@@ -1362,13 +1373,13 @@ A prototipação foi concentrada em um único fluxo, selecionado entre os quatro
 
 Os demais fluxos apresentados na Seção 4.2 não são detalhados por meio de protótipos nesta versão do documento. A prototipação foi deliberadamente limitada ao fluxo selecionado, permitindo demonstrar de forma mais completa a principal interação do sistema sem exigir a representação de todas as telas previstas para o produto.
 
-O fluxo escolhido é iniciado pela autenticação do Gestor / RH e percorre as seguintes etapas: acesso ao sistema, visualização das equipes existentes, definição dos critérios de uma nova formação, análise das sugestões geradas pela IA, ajuste manual de um integrante e revisão da composição antes da confirmação.
+O fluxo escolhido é iniciado pela autenticação do Gestor/RH e percorre as seguintes etapas: acesso ao sistema, visualização das equipes existentes, definição dos critérios de uma nova formação, análise das sugestões geradas pela IA, ajuste manual de um integrante e revisão da composição antes da confirmação.
 
 Para manter a interface simples e consistente, as telas autenticadas compartilham uma mesma estrutura visual, composta principalmente por cabeçalho, navegação lateral e área central de conteúdo. Assim, a maior parte dos elementos permanece constante entre as etapas, enquanto o conteúdo principal é alterado de acordo com a tarefa realizada.
 
 O fluxo prototipado é composto pelas cinco telas descritas a seguir.
 
-\subsection{Autenticação do Gestor / RH}
+\subsection{Autenticação do Gestor/RH}
 
 A primeira tela representa a autenticação do usuário no sistema. Foram considerados os elementos necessários para o acesso, como campos de e-mail e senha, opção de recuperação de senha e botão de entrada.
 
@@ -1439,7 +1450,7 @@ confirmação da nova versão. \\
 As Figuras~\ref{fig:tela-login} a~\ref{fig:tela-confirmacao} apresentam os
 protótipos correspondentes às cinco etapas do fluxo. Os protótipos foram
 elaborados priorizando consistência entre as telas, clareza das informações e
-redução do esforço necessário para a realização da tarefa pelo Gestor / RH.
+redução do esforço necessário para a realização da tarefa pelo Gestor/RH.
 
 
 % ============================================================================
@@ -2093,7 +2104,7 @@ Não é necessário criar uma matriz extensa; um ou dois exemplos relevantes
 podem ser suficientes para demonstrar a prática.}
 
 O planejamento do trabalho acontece no Taiga.io, onde ficam o \textit{backlog},
-as histórias de usuário, as tarefas e o quadro Kanban. O código, as revisões e
+as histórias de usuário, as tarefas e o quadro Scrumban. O código, as revisões e
 as automações ficam no GitHub. Manter as duas ferramentas desconectadas criaria
 duas fontes de verdade que divergem em poucas semanas, o que a equipe evita com
 a integração de controle de versão do Taiga, configurada por \textit{webhook}
@@ -2350,7 +2361,7 @@ descrito no capítulo de Gestão de Configuração e Manutenção.}
 \toprule
 \textbf{Data} & \textbf{Autor(es)} & \textbf{Versão} & \textbf{Alteração} \\
 \midrule
-DD/MM/AAAA & Equipe & 1.0 & Versão inicial para entrega. \\
+08/09/2026 & Equipe RANK-IA & 1.0 & Versão inicial para entrega. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2388,8 +2399,9 @@ foi omitido: os dois perfis de usuário, os sistemas de terceiros, o
 \textit{pipeline} de re-treinamento previsto pelo RNF09, a responsabilidade de
 cada componente por extenso e o protocolo de comunicação em todas as relações.
 Destina-se à consulta pontual durante a implementação --- para localizar quem
-chama quem, e por qual contrato --- e não à leitura sequencial. Por ser larga, a figura é
-apresentada em orientação paisagem, ocupando uma página inteira.
+chama quem, e por qual contrato --- e não à leitura sequencial. Por ser larga, a
+Figura~\ref{fig:c4-detalhado} é apresentada em orientação paisagem, ocupando uma
+página inteira.
 
 Os dois diagramas são gerados a partir de arquivos-fonte distintos, versionados
 em \texttt{projeto/diagramas/}, e não de uma imagem editada à mão. Alterar a
