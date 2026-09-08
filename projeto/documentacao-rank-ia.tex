@@ -1296,28 +1296,11 @@ Baixo acoplamento e testabilidade; base concreta do DIP. \\
 \chapter{Projeto de Interface do Usuário}
 % ============================================================================
 
-\orientacao{Apresentem as interfaces e os principais fluxos de interação do
-usuário com o sistema. O principal artefato pode ser constituído por
-protótipos de baixa ou alta fidelidade. Diagramas de atividade, fluxos de
-navegação ou outros artefatos podem complementar a explicação.}
-
-\orientacao{Para cada fluxo principal, expliquem brevemente a tarefa do
-usuário e as decisões de interface relevantes. Se a equipe utilizar uma
-ferramenta externa, como Figma, apresentem exemplos representativos neste
-documento e forneçam o link para o material completo.}
-
-O projeto de interface do RANK-IA foi elaborado a partir dos requisitos funcionais
-e não funcionais, das regras de negócio, das histórias de usuário e dos casos de
-uso definidos nas etapas anteriores do projeto. As decisões apresentadas 
-neste capítulo buscam transformar essas definições em uma interface que seja 
-adequada aos diferentes perfis de usuário e que apoie, de forma clara, as principais 
-atividades do sistema.
+O projeto de interface do RANK-IA foi elaborado a partir dos requisitos funcionais e não funcionais, das regras de negócio, das histórias de usuário e dos casos de uso definidos nas etapas anteriores do projeto. As decisões apresentadas neste capítulo buscam transformar essas definições em uma interface que seja adequada aos diferentes perfis de usuário e que apoie, de forma clara, as principais atividades do sistema.
 
 \section{Requisitos}
 
-A interface do RANK-IA foi desenvolvida considerando os seguintes princípios, 
-relacionados principalmente aos requisitos, regras de negócio e características
-dos perfis de usuário definidos para o sistema:
+As decisões de interface do RANK-IA foram orientadas pelos requisitos do sistema, pelas regras de negócio e pelas características dos perfis de usuário definidos no projeto anteriormente:
 \\
 \begin{itemize}[nosep]
 
@@ -1381,40 +1364,79 @@ O fluxo prototipado é composto pelas cinco telas descritas a seguir.
 
 \subsection{Autenticação do Gestor/RH}
 
-A primeira tela representa a autenticação do usuário no sistema. Foram considerados os elementos necessários para o acesso, como campos de e-mail e senha, opção de recuperação de senha e botão de entrada.
+A primeira tela representa a autenticação do usuário no sistema. Foram considerados os elementos necessários para o acesso, como campos de e-mail e senha, opção de recuperação de senha e botão de entrada. Também é apresentada a opção de manter a sessão ativa e uma indicação de acesso seguro ao ambiente corporativo.
 
-A tela possui uma estrutura simples, uma vez que sua função principal é permitir que o usuário acesse as funcionalidades correspondentes ao seu perfil.
+A tela possui uma estrutura simples, uma vez que sua função principal é permitir que o usuário acesse as funcionalidades correspondentes ao seu perfil. Como elemento visual da identidade do RANK-IA, a interface também utiliza uma faixa inferior em azul com uma representação abstrata de conexões relacionadas à Inteligência Artificial.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{tela-login.jpg}
+    \caption{Protótipo da tela de autenticação do RANK-IA}
+    \label{fig:tela-login}
+\end{figure}
+
 
 \subsection{Página inicial e gerenciamento de equipes}
 
-Após a autenticação, o usuário é direcionado à área principal do sistema. Nessa tela são apresentadas as equipes existentes e informações resumidas sobre cada composição, incluindo seu Coeficiente de Aproveitamento e quantidade de integrantes.
+Após a autenticação, o usuário é direcionado à área principal do sistema. Nessa tela são apresentadas as equipes existentes e informações resumidas sobre cada composição, incluindo seu Coeficiente de Aproveitamento, quantidade de integrantes e status da equipe.
 
-A tela também apresenta a opção de iniciar uma nova formação por meio da ação \textit{Gerar nova equipe}. Dessa forma, a página funciona como ponto de entrada para o fluxo principal de formação de equipes.
+A tela também apresenta a opção de iniciar uma nova formação por meio da ação \textit{Gerar nova equipe}. Dessa forma, a página funciona como ponto de entrada para o fluxo principal de formação de equipes, além de permitir o acompanhamento das equipes já existentes.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{tela-equipes.jpg}
+    \caption{Protótipo da página inicial e gerenciamento de equipes}
+    \label{fig:tela-equipes}
+\end{figure}
+
 
 \subsection{Definição dos critérios de formação}
 
 Nesta etapa, o usuário informa os critérios utilizados para a geração da equipe. São considerados campos como nome ou projeto da equipe, objetivo, quantidade de integrantes, competências essenciais e peso atribuído à experiência.
 
-A quantidade de opções foi mantida reduzida para evitar excesso de informações e concentrar a interação nos critérios que possuem relação direta com a formação da equipe.
+A quantidade de opções foi mantida reduzida para evitar excesso de informações e concentrar a interação nos critérios que possuem relação direta com a formação da equipe. Após o preenchimento, o usuário pode iniciar o processo de geração por meio da ação \textit{Gerar equipe com IA}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{tela-criterios.jpg}
+    \caption{Protótipo da tela de definição dos critérios de formação}
+    \label{fig:tela-criterios}
+\end{figure}
+
 
 \subsection{Sugestão da IA e ajuste da composição}
 
 Após a definição dos critérios, a interface apresenta a sugestão gerada pela IA, incluindo os integrantes selecionados e o respectivo Coeficiente de Aproveitamento.
 
-A partir dessa mesma etapa, o usuário pode iniciar um ajuste manual. Ao selecionar um integrante, são apresentadas alternativas de substituição, acompanhadas das informações necessárias para comparação e, quando aplicável, do efeito esperado sobre o CA. Dessa forma, o usuário não precisa abandonar a visualização da equipe para realizar a alteração.
+A partir dessa mesma etapa, o usuário pode iniciar um ajuste manual. Ao selecionar um integrante, são apresentadas alternativas de substituição, acompanhadas das informações necessárias para comparação e do efeito esperado sobre o CA. No protótipo, a substituição de Bruno Lima por Mariana Silva resulta em um aumento do CA de 87\% para 92\%. Dessa forma, o usuário pode realizar a alteração sem abandonar a visualização da equipe e acompanhar imediatamente a modificação realizada.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{tela-sugestao.jpg}
+    \caption{Protótipo da tela de sugestão da IA e ajuste da composição}
+    \label{fig:tela-sugestao}
+\end{figure}
+
 
 \subsection{Revisão e confirmação da equipe}
 
 A última tela apresenta a composição final da equipe para revisão. São exibidos os integrantes, o Coeficiente de Aproveitamento atualizado e um resumo das alterações realizadas durante o processo de ajuste.
 
-Antes da confirmação, o usuário pode retornar à etapa anterior para realizar novas alterações. Ao confirmar a equipe, a composição é registrada pelo sistema, mantendo o histórico correspondente à nova versão da equipe.
+Antes da confirmação, o usuário pode retornar à etapa anterior para realizar novas alterações. Após a confirmação, a interface apresenta uma mensagem de sucesso indicando que a equipe foi criada, que a versão 2 foi registrada e que o ajuste realizado foi armazenado como feedback para o modelo de IA. Dessa forma, a tela representa também o registro da nova versão da equipe após a conclusão do fluxo.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{tela-revisao.jpg}
+    \caption{Protótipo da tela de revisão e confirmação da equipe}
+    \label{fig:tela-revisao}
+\end{figure}
 
 \subsection{Decisões de interface do fluxo prototipado}
 
-A Tabela 4.1 sintetiza as principais decisões de interface
-adotadas ao longo do fluxo prototipado. O objetivo da tabela não é repetir os
-requisitos ou descrever cada tela isoladamente, mas registrar como as
-necessidades do fluxo foram traduzidas em decisões concretas de interação.
+A Tabela 4.1 sintetiza as principais decisões de interface adotadas ao longo
+do fluxo prototipado. O objetivo da tabela não é repetir os requisitos ou
+descrever cada tela isoladamente, mas registrar como as necessidades
+identificadas no fluxo foram traduzidas em decisões concretas de interação.
 
 \begin{table}[ht]
 \centering
@@ -1424,33 +1446,36 @@ necessidades do fluxo foram traduzidas em decisões concretas de interação.
 \toprule
 \textbf{Etapa} & \textbf{Necessidade do usuário} & \textbf{Decisão de interface} \\
 \midrule
-Autenticação & Acessar o ambiente de forma segura e direta &
-Apresentar campos de e-mail e senha, ação principal de entrada e recuperação
-de senha em uma estrutura simples. \\
 
-Visão geral & Consultar equipes existentes e iniciar uma nova formação &
-Utilizar cards ou componentes equivalentes para apresentar equipes e CA,
-mantendo a ação ``Gerar nova equipe'' em posição de destaque. \\
+Autenticação &
+Acessar o sistema de forma segura e direta &
+Apresentar campos de e-mail e senha, opção de manter a sessão ativa, recuperação de senha e ação principal de entrada em uma estrutura simples. \\
 
-Definição & Informar os critérios necessários para a formação &
-Concentrar os parâmetros essenciais em uma única etapa, evitando dividir a
-configuração em várias telas. \\
+Visão geral das equipes &
+Consultar equipes existentes e iniciar uma nova formação &
+Apresentar as equipes em cards, com informações como CA, quantidade de integrantes e status, mantendo a ação ``Gerar nova equipe'' em posição de destaque. \\
 
-Análise e ajuste & Comparar sugestões e modificar a composição &
-Apresentar integrantes e CA de forma destacada e disponibilizar alternativas
-de substituição na mesma área de interação. \\
+Definição dos critérios &
+Informar os dados necessários para a geração da equipe &
+Concentrar em uma única etapa os parâmetros essenciais, como projeto, objetivo, número de integrantes, habilidades essenciais e peso da experiência. \\
 
-Confirmação & Verificar a decisão antes de salvá-la &
-Exibir a composição final, o CA atualizado e o resumo das alterações antes da
-confirmação da nova versão. \\
+Sugestão e ajuste &
+Avaliar a composição gerada e realizar alterações sem perder o contexto &
+Apresentar a composição e o CA em destaque, disponibilizando candidatos para substituição na mesma tela e mostrando o impacto da alteração sobre o CA. \\
+
+Revisão e confirmação &
+Verificar a composição final e as alterações realizadas antes do registro &
+Exibir os integrantes finais, o CA atualizado e um resumo das alterações, permitindo retornar aos ajustes ou confirmar a equipe. \\
+
 \bottomrule
 \end{tabularx}
 \end{table}
 
-As Figuras~\ref{fig:tela-login} a~\ref{fig:tela-confirmacao} apresentam os
+As Figuras~\ref{fig:tela-login} a~\ref{fig:tela-revisao} apresentam os
 protótipos correspondentes às cinco etapas do fluxo. Os protótipos foram
-elaborados priorizando consistência entre as telas, clareza das informações e
-redução do esforço necessário para a realização da tarefa pelo Gestor/RH.
+elaborados priorizando a consistência visual e estrutural entre as telas, a
+clareza das informações relevantes para cada etapa e a redução do esforço
+necessário para concluir o processo de formação da equipe.
 
 
 % ============================================================================
