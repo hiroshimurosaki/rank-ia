@@ -1008,23 +1008,27 @@ de soluções.
 sistema. O projeto de componentes pode ser representado graficamente,
 textualmente ou por tabelas, de acordo com a natureza da solução.}
 
-% TODO(grupo): confirmar com o Cap.~\ref{cha:arquitetura} (Arquitetura), ainda em
-% aberto, a fronteira entre o nível de componente do C4 (lá) e o detalhamento
-% interno das classes (aqui), para não repetir nem deixar lacuna.
-% TODO(grupo): os materiais de apresentação trazem duas grafias do domínio ---
-% uma em TypeScript (GerenciadorDeEquipes, IEquipeRepository, IIAGeradoraService)
-% e uma em Python (GeradorEquipes, IRepositorioEquipe, IAvaliadorEquipe). Este
-% capítulo adota a versão TypeScript como canônica, por ser a que a nota do
-% projeto e o Cap.~\ref{cha:testes} já usam. Alinhar os diagramas exportados a
-% essa grafia antes da entrega.
+% NOTA(grupo): a fronteira com o Cap.~\ref{cha:arquitetura} está resolvida --- ele
+% cobre os níveis 1--3 do C4 (contexto, contêineres e componentes) e delega a este
+% capítulo o nível 4 (as classes internas), conforme a Seção~\ref{sec:conteineres}.
+% TODO(grupo): a grafia canônica do domínio é a TypeScript
+% (GerenciadorDeEquipes, IEquipeRepository, IIAGeradoraService), coerente com os
+% nomes de componente do Cap.~\ref{cha:arquitetura} e com o Cap.~\ref{cha:testes}.
+% Falta apenas conferir se os diagramas exportados (.png) já usam essa grafia
+% (hoje as fontes .mmd ainda misturam tipos em estilo Python) antes da entrega.
 
-Enquanto o Capítulo~\ref{cha:arquitetura} apresenta a decomposição do RANK-IA em
-processos (\textit{frontend}, API, serviços de IA e banco), este capítulo desce
-ao interior do componente que concentra a regra de negócio: o módulo de equipes,
-onde vivem a geração automática, o cálculo do Coeficiente de Aproveitamento e o
-versionamento das equipes. O foco recai sobre esse módulo porque é ali que estão
-as decisões de projeto de maior impacto na manutenibilidade prometida como
-objetivo de qualidade na Seção~\ref{sec:quality-goals}.
+Enquanto o Capítulo~\ref{cha:arquitetura} descreve o RANK-IA nos três primeiros
+níveis do C4 --- contexto, contêineres e componentes ---, este capítulo desenvolve
+o quarto nível: o detalhamento em classes do caso de uso central, a geração de
+equipes. Esse caso de uso atravessa dois contêineres da
+Seção~\ref{sec:conteineres}: o componente \emph{Gerenciador de Equipes}, na API,
+que orquestra o fluxo e responde pelo cálculo do Coeficiente de Aproveitamento
+(mantido na API pela decisão~D5) e pelo versionamento; e o serviço \emph{IA
+Geradora de Equipes}, em Python, que abriga o modelo de aprendizado propriamente
+dito. Os dois se comunicam por uma interface, nunca por classes concretas. O foco
+recai sobre esse recorte porque é nele que estão as decisões de projeto de maior
+impacto na manutenibilidade prometida como objetivo de qualidade na
+Seção~\ref{sec:quality-goals}.
 
 \section{Visão geral dos componentes}
 
@@ -1032,6 +1036,18 @@ objetivo de qualidade na Seção~\ref{sec:quality-goals}.
 sistemas maiores, esta visão geral pode cobrir todos os componentes, enquanto
 o detalhamento das seções seguintes pode se concentrar apenas nos mais
 relevantes ou complexos.}
+
+Os componentes abaixo são a realização, em classes, dos componentes de nível~3
+que o Capítulo~\ref{cha:arquitetura} atribuiu à API
+(Tabela~\ref{tab:componentes-api}): o \texttt{GerenciadorDeEquipes} realiza o
+\emph{Gerenciador de Equipes}; o \texttt{CoeficienteAproveitamento}, a
+\emph{Calculadora do Coeficiente de Aproveitamento}; o \texttt{HistoricoAjustes},
+o \emph{Registro de Histórico e Versões}; o \texttt{EquipeRepository}, o
+\emph{Repositório de Dados}; o \texttt{EmailNotificadorService}, o
+\emph{Notificador}; e o \texttt{IAGeradoraServiceClient}, o \emph{Cliente de
+Integração IA}. Já o \texttt{GeradorEquipes} e o \texttt{ModeloRL} não pertencem à
+API: são a estrutura interna do serviço \emph{IA Geradora de Equipes} em Python,
+alcançado pela API somente através da interface \texttt{IIAGeradoraService}.
 
 \begin{table}[H]
 \centering
@@ -1044,15 +1060,17 @@ relevantes ou complexos.}
 \texttt{GerenciadorDeEquipes} & Orquestra o caso de uso de geração: coordena IA,
 persistência e notificação, sem executar nenhuma dessas tarefas diretamente. \\
 \texttt{GeradorEquipes} & Aplica o modelo e os critérios para formar a equipe a
-partir dos colaboradores elegíveis. É o núcleo do domínio. \\
+partir dos colaboradores elegíveis. É o núcleo da geração, residente no serviço de
+IA em Python (não na API). \\
 \texttt{ModeloRL} & Encapsula os pesos e hiperparâmetros do algoritmo de
-aprendizado e expõe as operações de predição e treinamento. \\
+aprendizado e expõe as operações de predição e treinamento; interno ao serviço de
+IA. \\
 \texttt{CriterioFormacao} & Define parâmetros e requisitos da equipe (tamanho,
 habilidades exigidas, peso da experiência). \\
 \texttt{CoeficienteAproveitamento} & Calcula e expõe a métrica de qualidade da
 equipe gerada (RN05). \\
-\texttt{HistoricoAjustes} & Registra os ajustes manuais do gestor para
-retroalimentar o modelo (RN07). \\
+\texttt{HistoricoAjustes} & Registra os ajustes manuais do gestor, com motivo e
+mudanças, para retroalimentar o modelo (RN03). \\
 \texttt{EquipeRepository} & Persiste e recupera equipes; isola o domínio da
 tecnologia de banco (implementa \texttt{IEquipeRepository}). \\
 \texttt{IAGeradoraServiceClient} & Comunica-se com o serviço externo de IA
@@ -1094,13 +1112,30 @@ carrega o \texttt{CoeficienteAproveitamento} calculado. O \texttt{Gestor} dispar
 a geração e registra ajustes; o \texttt{Colaborador} consulta seu perfil e seus
 treinamentos.
 
-O componente central é o \texttt{GeradorEquipes} --- o ``coração do sistema'',
-responsável por receber os colaboradores, aplicar o modelo e devolver uma equipe
-com seu coeficiente. Ele se relaciona com quatro colaboradores diretos:
+O componente central é o \texttt{GeradorEquipes} --- o ``coração da geração'',
+responsável por receber os colaboradores, aplicar o modelo e devolver uma
+composição candidata. Ele se relaciona com quatro colaboradores diretos:
 \textit{usa} um \texttt{ModeloRL} para predizer a composição, é \textit{configurado}
 por um \texttt{CriterioFormacao}, \textit{gera} um \texttt{CoeficienteAproveitamento}
 e \textit{registra} mudanças em um \texttt{HistoricoAjustes}. A
 Figura~\ref{fig:classes-gerador} detalha essas quatro relações.
+
+A figura é uma visão \emph{lógica} da colaboração: ela mostra o que participa da
+geração, não em que processo cada classe roda. Fisicamente, apenas
+\texttt{GeradorEquipes}, \texttt{ModeloRL} e \texttt{CriterioFormacao} vivem no
+serviço de IA em Python; o \texttt{CoeficienteAproveitamento} e o
+\texttt{HistoricoAjustes} pertencem à API. Assim, a relação ``gera um
+\texttt{CoeficienteAproveitamento}'' se concretiza na API --- o serviço de IA usa a
+fórmula como função objetivo, mas o valor exibido e persistido é sempre recalculado
+pela API (decisão~D5) ---, e ``registra em \texttt{HistoricoAjustes}'' também
+ocorre na API, único contêiner com acesso ao banco (decisão~D4). O
+\texttt{GerenciadorDeEquipes} é quem costura esses passos através da interface
+\texttt{IIAGeradoraService}.
+
+% TODO(grupo): se quiserem consistência física estrita na própria figura, reeditar
+% projeto/diagramas/diagrama-classes-gerador.mmd para que o hub seja o
+% GerenciadorDeEquipes (API) chamando o GeradorEquipes via IIAGeradoraService, com
+% CoeficienteAproveitamento e HistoricoAjustes do lado da API, e reexportar o .png.
 
 % NOTA(grupo): fonte em projeto/diagramas/diagrama-classes-gerador.mmd
 \begin{figure}[htbp]
@@ -1200,9 +1235,9 @@ interfaces estreitas, não por dependências concretas. A modularização por co
 mantém no mesmo módulo (\texttt{src/equipes/}) tudo o que uma mudança de regra de
 equipe tende a tocar, reduzindo o efeito de propagação de uma alteração.
 
-% TODO(grupo): se sobrar espaço, incluir uma frase sobre LSP (AvaliadorIA e um
-% fallback por regras são substituíveis sob a mesma interface) e ISP (interfaces
-% mínimas e separadas), fechando os cinco princípios SOLID.
+% TODO(grupo): se sobrar espaço, incluir uma frase sobre LSP (duas implementações
+% do modelo, intercambiáveis sob a mesma IIAGeradoraService) e ISP (as três
+% interfaces de fronteira mínimas e separadas), fechando os cinco princípios SOLID.
 
 \section{Padrões de projeto}
 
@@ -1226,10 +1261,10 @@ Tabela~\ref{tab:padroes} os resume.
 \textit{Repository} & Isolar o domínio da tecnologia de persistência.
 \texttt{IEquipeRepository} $\rightarrow$ \texttt{EquipeRepository}. & Trocar o
 banco sem tocar na lógica de negócio; testar o domínio sem banco real. \\
-\textit{Strategy} & Permitir mais de uma forma de gerar/avaliar equipes sob um
-mesmo contrato. \texttt{IIAGeradoraService}, com implementação por IA e um
-\textit{fallback} por regras. & Substituir o modelo de IA (RNF07) e degradar para
-regras quando o serviço falha, sem alterar o chamador. \\
+\textit{Strategy} & Permitir mais de uma implementação da geração por IA sob um
+mesmo contrato. \texttt{IIAGeradoraService}, com uma ou mais implementações do
+modelo intercambiáveis. & Substituir o modelo de IA sem alterar o chamador
+(RNF07, decisão~D7): o \texttt{GerenciadorDeEquipes} depende apenas da interface. \\
 \textit{Dependency Injection} & Fornecer as dependências ao
 \texttt{GerenciadorDeEquipes} de fora, em vez de instanciá-las internamente. &
 Baixo acoplamento e testabilidade; base concreta do DIP. \\
@@ -1237,10 +1272,11 @@ Baixo acoplamento e testabilidade; base concreta do DIP. \\
 \end{tabularx}
 \end{table}
 
-% TODO(grupo): confirmar se o "fallback por regras" (AvaliadorRegras nos slides
-% em Python) entra de fato no escopo do RANK-IA ou se é apenas ilustrativo. Se
-% não entrar, descrever o Strategy só como a troca entre implementações da
-% IIAGeradoraService, sem o fallback.
+% NOTA(grupo): o Strategy aqui é só a troca entre implementações da
+% IIAGeradoraService. O "fallback por regras" dos slides foi deixado de fora por
+% não ter respaldo no Cap.~\ref{cha:arquitetura}: o que a restrição de validação
+% humana obrigatória exige (Seção~\ref{sec:restricoes-arq}) é que o sistema siga
+% usável em consulta e ajuste manual com a IA fora do ar --- não um segundo gerador.
 
 % ============================================================================
 \chapter{Projeto de Interface do Usuário}
