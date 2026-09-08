@@ -891,6 +891,153 @@ usuário e as decisões de interface relevantes. Se a equipe utilizar uma
 ferramenta externa, como Figma, apresentem exemplos representativos neste
 documento e forneçam o link para o material completo.}
 
+O projeto de interface do RANK-IA foi elaborado a partir dos requisitos funcionais
+e não funcionais, das regras de negócio, das histórias de usuário e dos casos de
+uso definidos nas etapas anteriores do projeto. As decisões apresentadas 
+neste capítulo buscam transformar essas definições em uma interface que seja 
+adequada aos diferentes perfis de usuário e que apoie, de forma clara, as principais 
+atividades do sistema.
+
+\section{Requisitos}
+
+A interface do RANK-IA foi desenvolvida considerando os seguintes princípios, 
+relacionados principalmente aos requisitos, regras de negócio e características
+dos perfis de usuário definidos para o sistema:
+\\
+\begin{itemize}[nosep]
+
+\item \textbf{Aplicação web e compatibilidade (RNF-06 e RNF-08):} o RANK-IA é desenvolvido como uma aplicação web e deve funcionar corretamente nos ambientes previstos no projeto. Dessa forma, a interface foi pensada para utilização em navegadores e para manter seu funcionamento nas plataformas Windows, Linux e macOS. Também foi considerada a resolução mínima de tela estabelecida pelo RNF-06, de modo que os principais elementos da interface permaneçam acessíveis e organizados.
+
+\item \textbf{Acesso de acordo com o perfil (RF07 e RN04):} o sistema possui dois perfis principais de usuário, Gestor / RH e Colaborador, com diferentes níveis de acesso. O Gestor / RH possui acesso às funcionalidades de gerenciamento de colaboradores, formação de equipes e relatórios, enquanto o Colaborador possui acesso restrito às próprias informações, às equipes das quais participa e às recomendações de treinamento. Assim, a navegação e as funcionalidades apresentadas pela interface devem ser compatíveis com as permissões do usuário autenticado.
+
+\item \textbf{Clareza das informações utilizadas na formação de equipes (RF03, RN05 e RIA-04):} o Coeficiente de Aproveitamento (CA) é utilizado como indicador da qualidade das equipes formadas. Por esse motivo, a composição das equipes e seu respectivo CA devem receber destaque na interface, permitindo que o usuário compreenda a sugestão apresentada e compare diferentes possibilidades de formação. As informações relevantes para a decisão, como integrantes e competências, devem ser apresentadas de maneira conjunta sempre que necessário.
+
+\item \textbf{Controle do usuário sobre as sugestões da IA (RF04, RN03, UC-02 e UC-03):} a geração automática de equipes tem como objetivo apoiar a decisão do usuário, e não substituí-la. O Gestor / RH deve poder analisar a sugestão produzida pela IA, realizar alterações na composição da equipe e confirmar o resultado final. A interface deve, portanto, tornar as possibilidades de ajuste acessíveis e apresentar as consequências da alteração, especialmente em relação ao CA. Além disso, os ajustes realizados devem ser registrados conforme estabelecido pela RN03.
+
+\item \textbf{Usabilidade e redução do esforço durante as tarefas (RNF-05):} o RNF-05 estabelece que a interface deve ser utilizável por gestores sem treinamento especializado e que uma alteração manual na equipe deve poder ser realizada rapidamente. Por isso, as etapas do fluxo de formação foram mantidas objetivas, com informações necessárias apresentadas no momento da decisão e com ações de ajuste concentradas na própria tela sempre que possível.
+
+\item \textbf{Consistência da interface:} os elementos utilizados nas diferentes etapas do sistema devem manter padrões visuais e de interação semelhantes, especialmente nas telas autenticadas. Essa escolha busca reduzir a necessidade de reaprendizado entre diferentes partes do sistema e está relacionada às regras de ouro de Theo Mandel, particularmente às recomendações de manter a interface consistente, colocar o usuário no controle e reduzir a carga de memória necessária para utilização da interface \cite{mandel1997}.
+
+\end{itemize}
+
+Esses princípios orientaram tanto a organização geral das telas quanto as decisões específicas apresentadas nos protótipos do fluxo de formação de equipes.
+
+\section{Principais fluxos de usuário}
+
+Os fluxos principais do RANK-IA foram derivados das histórias de usuário e dos casos de uso definidos na etapa anterior. Cada fluxo representa uma atividade realizada pelo usuário e pode envolver diferentes telas e estados da interface.
+
+Foram selecionados quatro fluxos como representativos do funcionamento do sistema: \textbf{gerenciamento de colaboradores}, \textbf{geração de equipes por IA}, \textbf{ajuste e validação manual da equipe} e \textbf{acompanhamento do desenvolvimento do colaborador}. Em conjunto, esses fluxos abrangem as principais interações previstas para os dois perfis de usuário do sistema.
+
+\subsection{Gerenciamento de colaboradores}
+
+O fluxo de gerenciamento de colaboradores está relacionado ao UC-01 e à RIA-01, envolvendo o cadastro e a manutenção das informações utilizadas pelo RANK-IA. O Gestor / RH pode inserir os dados manualmente ou utilizar um arquivo PDF, cuja leitura pode auxiliar no preenchimento das informações. Após o preenchimento, os dados devem ser revisados e validados pelo usuário.
+
+Esse fluxo também considera as regras RN01 e RN02, que estabelecem a necessidade de manutenção periódica dos dados e determinam que somente colaboradores com informações completas participem da formação automática de equipes.
+
+\subsection{Geração de equipes por IA}
+
+O fluxo de geração de equipes está relacionado principalmente ao UC-02 e à RIA-04. Nele, o Gestor / RH define os critérios necessários para a formação, como objetivo da equipe, quantidade de integrantes, competências essenciais e peso atribuído à experiência.
+
+Após o acionamento da geração, a IA apresenta uma ou mais sugestões de composição, acompanhadas do respectivo Coeficiente de Aproveitamento. A interface deve permitir que o usuário compreenda a composição sugerida e avalie sua adequação antes de decidir pela confirmação ou pelo ajuste manual da equipe.
+
+\subsection{Ajuste e validação manual da equipe}
+
+O fluxo de ajuste e validação corresponde principalmente ao UC-03 e à RIA-05. A partir de uma sugestão gerada pela IA, o Gestor / RH pode selecionar um integrante e visualizar outros colaboradores disponíveis para substituição.
+
+A interface deve apresentar as alternativas de maneira que o usuário consiga avaliar a alteração e seu possível impacto no CA. Depois da substituição, a nova composição deve ser atualizada e o usuário pode revisar a equipe antes de confirmá-la. Os ajustes realizados são registrados como feedback, conforme a RN03, e a equipe formada deve manter seu histórico de versões de acordo com a RN07.
+
+\subsection{Acompanhamento do desenvolvimento do colaborador}
+
+O fluxo de acompanhamento do desenvolvimento está relacionado principalmente às RIA-07 e RIA-08. Nesse fluxo, o Colaborador pode visualizar informações relacionadas às suas competências, lacunas identificadas e recomendações de treinamento.
+
+A interface desse fluxo deve priorizar a visualização das informações relevantes para o desenvolvimento individual, apresentando as recomendações de forma clara e compatível com o nível de acesso do perfil Colaborador.
+
+\section{Telas prototipadas}
+
+A prototipação foi concentrada em um único fluxo, selecionado entre os quatro fluxos principais apresentados anteriormente: o fluxo de \textbf{geração e ajuste manual de uma equipe por IA}. A escolha foi motivada por sua representatividade em relação ao objetivo central do RANK-IA, pois reúne em uma única sequência a definição dos critérios de formação, a geração automatizada de sugestões, a análise do Coeficiente de Aproveitamento e a intervenção do usuário.
+
+Os demais fluxos apresentados na Seção 4.2 não são detalhados por meio de protótipos nesta versão do documento. A prototipação foi deliberadamente limitada ao fluxo selecionado, permitindo demonstrar de forma mais completa a principal interação do sistema sem exigir a representação de todas as telas previstas para o produto.
+
+O fluxo escolhido é iniciado pela autenticação do Gestor / RH e percorre as seguintes etapas: acesso ao sistema, visualização das equipes existentes, definição dos critérios de uma nova formação, análise das sugestões geradas pela IA, ajuste manual de um integrante e revisão da composição antes da confirmação.
+
+Para manter a interface simples e consistente, as telas autenticadas compartilham uma mesma estrutura visual, composta principalmente por cabeçalho, navegação lateral e área central de conteúdo. Assim, a maior parte dos elementos permanece constante entre as etapas, enquanto o conteúdo principal é alterado de acordo com a tarefa realizada.
+
+O fluxo prototipado é composto pelas cinco telas descritas a seguir.
+
+\subsection{Autenticação do Gestor / RH}
+
+A primeira tela representa a autenticação do usuário no sistema. Foram considerados os elementos necessários para o acesso, como campos de e-mail e senha, opção de recuperação de senha e botão de entrada.
+
+A tela possui uma estrutura simples, uma vez que sua função principal é permitir que o usuário acesse as funcionalidades correspondentes ao seu perfil.
+
+\subsection{Página inicial e gerenciamento de equipes}
+
+Após a autenticação, o usuário é direcionado à área principal do sistema. Nessa tela são apresentadas as equipes existentes e informações resumidas sobre cada composição, incluindo seu Coeficiente de Aproveitamento e quantidade de integrantes.
+
+A tela também apresenta a opção de iniciar uma nova formação por meio da ação \textit{Gerar nova equipe}. Dessa forma, a página funciona como ponto de entrada para o fluxo principal de formação de equipes.
+
+\subsection{Definição dos critérios de formação}
+
+Nesta etapa, o usuário informa os critérios utilizados para a geração da equipe. São considerados campos como nome ou projeto da equipe, objetivo, quantidade de integrantes, competências essenciais e peso atribuído à experiência.
+
+A quantidade de opções foi mantida reduzida para evitar excesso de informações e concentrar a interação nos critérios que possuem relação direta com a formação da equipe.
+
+\subsection{Sugestão da IA e ajuste da composição}
+
+Após a definição dos critérios, a interface apresenta a sugestão gerada pela IA, incluindo os integrantes selecionados e o respectivo Coeficiente de Aproveitamento.
+
+A partir dessa mesma etapa, o usuário pode iniciar um ajuste manual. Ao selecionar um integrante, são apresentadas alternativas de substituição, acompanhadas das informações necessárias para comparação e, quando aplicável, do efeito esperado sobre o CA. Dessa forma, o usuário não precisa abandonar a visualização da equipe para realizar a alteração.
+
+\subsection{Revisão e confirmação da equipe}
+
+A última tela apresenta a composição final da equipe para revisão. São exibidos os integrantes, o Coeficiente de Aproveitamento atualizado e um resumo das alterações realizadas durante o processo de ajuste.
+
+Antes da confirmação, o usuário pode retornar à etapa anterior para realizar novas alterações. Ao confirmar a equipe, a composição é registrada pelo sistema, mantendo o histórico correspondente à nova versão da equipe.
+
+\subsection{Decisões de interface do fluxo prototipado}
+
+A Tabela 4.1 sintetiza as principais decisões de interface
+adotadas ao longo do fluxo prototipado. O objetivo da tabela não é repetir os
+requisitos ou descrever cada tela isoladamente, mas registrar como as
+necessidades do fluxo foram traduzidas em decisões concretas de interação.
+
+\begin{table}[ht]
+\centering
+\caption{Principais decisões de interface do fluxo prototipado.}
+\label{tab:decisoes-ui}
+\begin{tabularx}{0.95\textwidth}{p{0.22\textwidth} p{0.30\textwidth} X}
+\toprule
+\textbf{Etapa} & \textbf{Necessidade do usuário} & \textbf{Decisão de interface} \\
+\midrule
+Autenticação & Acessar o ambiente de forma segura e direta &
+Apresentar campos de e-mail e senha, ação principal de entrada e recuperação
+de senha em uma estrutura simples. \\
+
+Visão geral & Consultar equipes existentes e iniciar uma nova formação &
+Utilizar cards ou componentes equivalentes para apresentar equipes e CA,
+mantendo a ação ``Gerar nova equipe'' em posição de destaque. \\
+
+Definição & Informar os critérios necessários para a formação &
+Concentrar os parâmetros essenciais em uma única etapa, evitando dividir a
+configuração em várias telas. \\
+
+Análise e ajuste & Comparar sugestões e modificar a composição &
+Apresentar integrantes e CA de forma destacada e disponibilizar alternativas
+de substituição na mesma área de interação. \\
+
+Confirmação & Verificar a decisão antes de salvá-la &
+Exibir a composição final, o CA atualizado e o resumo das alterações antes da
+confirmação da nova versão. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+As Figuras~\ref{fig:tela-login} a~\ref{fig:tela-confirmacao} apresentam os
+protótipos correspondentes às cinco etapas do fluxo. Os protótipos foram
+elaborados priorizando consistência entre as telas, clareza das informações e
+redução do esforço necessário para a realização da tarefa pelo Gestor / RH.
+
+
 % ============================================================================
 %\chapter{Modelo de Dados}
 %% ============================================================================
