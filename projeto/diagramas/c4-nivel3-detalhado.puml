@@ -1,0 +1,103 @@
+@startuml c4-nivel3-detalhado
+' ============================================================================
+' RANK-IA -- Diagrama de Componentes da API Backend, versao DETALHADA
+' Fonte versionada. Exportar para ../images/c4-nivel3-detalhado.png
+'
+' Esta e a versao de referencia, destinada ao apendice do documento.
+' Diferente da Figura 2.3 do Capitulo 2 -- que e enxuta de proposito para
+' caber legivel na largura da pagina -- aqui esta tudo:
+'   - os atores e os sistemas externos;
+'   - a responsabilidade de cada componente por extenso;
+'   - o pipeline de re-treinamento;
+'   - o protocolo em todas as relacoes;
+'   - os requisitos atendidos por componente.
+' Ocupa uma pagina inteira, rotacionada.
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.12.0/C4_Component.puml
+
+LAYOUT_TOP_DOWN()
+
+skinparam dpi 200
+skinparam defaultFontSize 15
+skinparam ArrowFontSize 13
+skinparam WrapWidth 220
+skinparam nodesep 24
+skinparam ranksep 46
+
+title Componentes da API Backend (versão detalhada) — RANK-IA
+
+Person(gestor, "Gestor/RH", "Responsável pela administração da plataforma: cadastra colaboradores, parametriza a IA, solicita e valida equipes")
+Person(colaborador, "Colaborador", "Funcionário que presta serviços à empresa; acessa apenas os próprios dados")
+
+Container(frontend, "Frontend", "React, TypeScript", "Interface web de gestores e colaboradores. Não contém regra de negócio.")
+
+Container_Boundary(api, "API Backend [Node.js, TypeScript]") {
+    Component(auth, "Controlador de Autenticação e Segurança", "Node.js, middleware", "Login, sessão e verificação de permissões por perfil, aplicado antes de qualquer controlador.\n\nRF07, RN04, RNF01")
+
+    Component(colabs, "Gerenciador de Colaboradores", "Node.js", "Cadastro, edição e manutenção de competências e gaps; recebe currículos e enfileira a extração.\n\nRF01, RN01")
+
+    Component(equipes, "Gerenciador de Equipes", "Node.js", "Criação de equipes, ajuste manual e coordenação do fluxo de sugestão.\n\nRF02, RF04")
+
+    Component(ca, "Calculadora do Coeficiente de Aproveitamento", "Node.js", "Calcula o CA a partir da fórmula e dos pesos versionados. É regra de negócio, não detalhe do modelo.\n\nRN05, RF03")
+
+    Component(historico, "Registro de Histórico e Versões", "Node.js", "Grava cada ajuste manual com seu motivo e cria uma nova versão da equipe a cada alteração.\n\nRN03, RN07")
+
+    Component(treinamentos, "Serviço de Treinamentos e Relatórios", "Node.js", "Relatórios de desempenho individual e coletivo; conversão de gaps em cursos recomendados.\n\nRF05, RF06, RN06")
+
+    Component(notificador, "Notificador", "Node.js", "Envio de notificações atrás da abstração INotificadorService, que isola o meio de entrega.\n\nRIA-06")
+
+    Component(repo, "Repositório de Dados", "Node.js, TypeScript", "Única porta de leitura e escrita no PostgreSQL, atrás das interfaces de repositório.")
+
+    Component(clienteIa, "Cliente de Integração IA", "Node.js", "Adaptador para os serviços em Python. Implementa IIAGeradoraService e traduz o vocabulário do domínio no contrato HTTP.\n\nRNF07")
+}
+
+ContainerDb(db, "Banco de Dados", "PostgreSQL", "Colaboradores, competências, equipes e suas versões, histórico de ajustes, credenciais e a fila de ingestão de currículos.")
+
+Container(iaEquipes, "IA Geradora de Equipes", "Python", "Recebe critérios e colaboradores elegíveis e devolve composições candidatas ordenadas. Sem estado e sem acesso ao banco.")
+
+Container(iaCurriculos, "IA Analista de Currículos", "Python", "Recebe um currículo em PDF e devolve habilidades e experiências estruturadas. O arquivo não é retido.")
+
+Container(pipeline, "Pipeline de Re-treinamento", "Python, lote semanal", "Lê o histórico de ajustes, monta o conjunto de treino, treina, valida contra a versão anterior e publica o novo modelo.\n\nRNF09")
+
+System_Ext(email, "Serviço de e-mails", "Infraestrutura de correio corporativo da organização cliente")
+System_Ext(cursos, "Plataforma de cursos", "Catálogo externo de treinamentos em diversas áreas")
+
+' --- atores ---
+Rel(gestor, frontend, "Cadastra, solicita e valida equipes", "HTTPS")
+Rel(colaborador, frontend, "Consulta competências e treinamentos", "HTTPS")
+
+' --- entradas na API ---
+Rel(frontend, auth, "Autentica e renova sessão", "JSON/HTTPS")
+Rel(frontend, colabs, "Cadastra colaboradores e envia currículos", "JSON/HTTPS")
+Rel(frontend, equipes, "Solicita geração e ajusta equipes", "JSON/HTTPS")
+Rel(frontend, treinamentos, "Consulta relatórios e cursos sugeridos", "JSON/HTTPS")
+
+' --- coordenacao interna do dominio ---
+Rel(equipes, ca, "Calcula o CA da composição")
+Rel(equipes, historico, "Registra o ajuste e versiona a equipe")
+Rel(equipes, clienteIa, "Solicita composições candidatas")
+Rel(equipes, notificador, "Notifica os membros da equipe formada")
+Rel(colabs, clienteIa, "Envia currículo para extração")
+Rel(treinamentos, notificador, "Notifica cursos recomendados")
+
+' --- acesso a infraestrutura ---
+Rel(auth, repo, "Consulta credenciais e perfil")
+Rel(colabs, repo, "Lê e grava colaboradores")
+Rel(equipes, repo, "Lê e grava equipes")
+Rel(historico, repo, "Grava histórico e versões")
+Rel(treinamentos, repo, "Lê desempenho e gaps")
+Rel(repo, db, "Executa leituras e escritas", "SQL/TCP")
+
+' --- fronteiras externas ---
+Rel(clienteIa, iaEquipes, "Envia critérios, recebe sugestões", "JSON/HTTPS")
+Rel(clienteIa, iaCurriculos, "Envia PDF, recebe dados estruturados", "JSON/HTTPS")
+Rel(notificador, email, "Envia mensagem", "SMTP")
+Rel(treinamentos, cursos, "Consulta catálogo", "JSON/HTTPS")
+Rel(email, colaborador, "Entrega notificações")
+
+' --- re-treinamento ---
+Rel(pipeline, db, "Lê o histórico de ajustes", "SQL/TCP")
+Rel(pipeline, iaEquipes, "Publica a nova versão do modelo", "arquivo de pesos")
+
+SHOW_LEGEND()
+@enduml

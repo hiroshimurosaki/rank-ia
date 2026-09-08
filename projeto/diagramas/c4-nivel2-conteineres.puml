@@ -1,0 +1,55 @@
+@startuml c4-nivel2-conteineres
+' ============================================================================
+' RANK-IA -- Diagrama de Conteineres (C4, nivel 2)
+' Fonte versionada. Exportar para ../images/c4-nivel2-conteineres.png
+'
+' Decisoes que este diagrama precisa expressar (Cap. 2, Secao 2.4):
+'   D4 -- os servicos de IA NAO acessam o banco: nao ha seta deles para o
+'         PostgreSQL, e isso e deliberado.
+'   D5 -- o Coeficiente de Aproveitamento e calculado na API, nao na IA.
+'   D6 -- a ingestao de curriculos e assincrona, via fila em tabela do banco.
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.12.0/C4_Container.puml
+
+skinparam dpi 200
+
+title Diagrama de Contêineres — RANK-IA
+
+Person(gestor, "Gestor/RH", "Responsável pela administração da plataforma")
+Person(colaborador, "Colaborador", "Funcionário que presta serviços à empresa")
+
+System_Boundary(rankia, "Plataforma RANK-IA") {
+    Container(frontend, "Frontend", "React, TypeScript", "Interface de gestores e colaboradores: cadastro, solicitação e ajuste de equipes, relatórios e treinamentos. Não contém regra de negócio.")
+
+    Container(api, "API Backend", "Node.js, TypeScript", "Lógica de negócio, autenticação e autorização por perfil, cálculo do Coeficiente de Aproveitamento, orquestração dos serviços de IA e único ponto de acesso ao banco.")
+
+    Container(iaEquipes, "IA Geradora de Equipes", "Python", "Recebe critérios e colaboradores elegíveis e devolve composições candidatas ordenadas. Sem estado e sem acesso ao banco.")
+
+    Container(iaCurriculos, "IA Analista de Currículos", "Python", "Recebe um currículo em PDF e devolve habilidades e experiências estruturadas. O arquivo não é retido após o processamento.")
+
+    Container(pipeline, "Pipeline de Re-treinamento", "Python, execução em lote", "Semanalmente: lê o histórico de ajustes, monta o conjunto de treino, treina, valida contra a versão anterior e publica o novo modelo.")
+
+    ContainerDb(db, "Banco de Dados", "PostgreSQL", "Colaboradores, competências, equipes e suas versões, histórico de ajustes, credenciais e a fila de ingestão de currículos.")
+}
+
+System_Ext(email, "Serviço de e-mails", "Infraestrutura de correio corporativo")
+System_Ext(cursos, "Plataforma de cursos", "Catálogo externo de treinamentos")
+
+Rel(gestor, frontend, "Usa", "HTTPS")
+Rel(colaborador, frontend, "Usa", "HTTPS")
+
+Rel(frontend, api, "Faz requisições", "JSON/HTTPS")
+
+Rel(api, iaEquipes, "Solicita composições de equipe", "JSON/HTTPS, rede interna")
+Rel(api, iaCurriculos, "Envia currículo para extração", "JSON/HTTPS, rede interna")
+Rel(api, db, "Lê e escreve", "SQL/TCP")
+
+Rel(pipeline, db, "Lê o histórico de ajustes", "SQL/TCP")
+Rel_U(pipeline, iaEquipes, "Publica a nova versão do modelo", "arquivo de pesos")
+
+Rel(api, email, "Envia notificações", "SMTP")
+Rel(api, cursos, "Consulta treinamentos", "JSON/HTTPS")
+Rel(email, colaborador, "Entrega notificações")
+
+SHOW_LEGEND()
+@enduml

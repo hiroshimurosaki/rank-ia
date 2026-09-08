@@ -1,0 +1,28 @@
+@startuml c4-nivel1-contexto
+' ============================================================================
+' RANK-IA -- Diagrama de Contexto do Sistema (C4, nivel 1)
+' Fonte versionada. Exportar para ../images/c4-nivel1-contexto.png
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.12.0/C4_Context.puml
+
+skinparam dpi 200
+
+title Diagrama de Contexto do Sistema — RANK-IA
+
+Person(gestor, "Gestor/RH", "Responsável pela administração da plataforma: cadastra colaboradores, parametriza a IA e valida as equipes sugeridas")
+Person(colaborador, "Colaborador", "Funcionário que presta serviços à empresa; acessa apenas os próprios dados")
+
+System(rankia, "Plataforma RANK-IA", "Sistema corporativo que utiliza IA para formar equipes, analisar competências e recomendar treinamentos")
+
+System_Ext(email, "Serviço de e-mails", "Infraestrutura de correio corporativo da organização cliente")
+System_Ext(cursos, "Plataforma de cursos", "Catálogo externo de treinamentos em diversas áreas")
+
+Rel(gestor, rankia, "Cadastra colaboradores, solicita e valida equipes")
+Rel(colaborador, rankia, "Consulta competências, equipes e treinamentos")
+Rel(rankia, colaborador, "Recomenda cursos com base nos gaps")
+Rel(rankia, email, "Envia notificações", "SMTP")
+Rel(rankia, cursos, "Consulta treinamentos disponíveis", "JSON/HTTPS")
+Rel(email, colaborador, "Entrega notificações")
+
+SHOW_LEGEND()
+@enduml

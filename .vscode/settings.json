@@ -1,0 +1,9 @@
+{
+  // O LaTeX Workshop passa -auxdir na linha de comando ao chamar o latexmk,
+  // e isso sobrescreve o $aux_dir definido em projeto/.latexmkrc.
+  // Esta linha alinha os dois: o lixo de compilacao vai para projeto/build/
+  // e o PDF final continua em projeto/documentacao-rank-ia.pdf.
+  //
+  // E uma flag do proprio latexmk, entao funciona igual em MiKTeX e TeX Live.
+  "latex-workshop.latex.auxDir": "%DIR%/build"
+}

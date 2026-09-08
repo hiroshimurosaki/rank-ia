@@ -20,6 +20,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \definecolor{isogreen}{HTML}{2E7D32}
+\usepackage{float}      % permite [H]: fixa o float exatamente onde ele esta
 \usepackage{placeins}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -30,7 +31,6 @@
 \usepackage{fancyhdr}
 \usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
 \usepackage{listings}
-\usepackage{float}
 \usepackage{needspace}
 
 % ----------------------------------------------------------------------------
@@ -98,6 +98,20 @@ Departamento de Computação}
 \newcommand{\projtitle}{RANK-IA}
 \newcommand{\projsubtitle}{Formação otimizada de equipes com Inteligência Artificial}
 \newcommand{\semester}{2026}
+
+% ----------------------------------------------------------------------------
+% Colocação de floats
+% ----------------------------------------------------------------------------
+% Por padrão o LaTeX é conservador e adia tabelas e figuras para a página
+% seguinte, o que inverte a ordem de leitura. Os valores abaixo permitem que
+% uma página seja ocupada majoritariamente por floats antes disso acontecer.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
 
 \graphicspath{{images/}}
 
@@ -227,7 +241,7 @@ desenvolvimento profissional dos colaboradores.
 As principais partes interessadas do sistema estão descritas na
 Tabela~\ref{tab:stakeholders}.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Partes interessadas do RANK-IA.}
 \label{tab:stakeholders}
@@ -306,11 +320,14 @@ apêndice ou referenciada neste documento.}
 A especificação detalhada de requisitos, incluindo regras de negócio, casos de
 uso e histórias de usuário, foi elaborada na disciplina anterior e permanece
 válida como documento de referência. Esta seção reúne apenas os requisitos que
-influenciam diretamente as decisões de projeto discutidas neste documento.
+influenciam diretamente as decisões de projeto discutidas neste documento. As
+histórias de usuário daquela especificação são identificadas pelo prefixo RIA e
+citadas por esse identificador ao longo deste documento, sem serem aqui
+reproduzidas.
 
 A Tabela~\ref{tab:rf} apresenta os requisitos funcionais essenciais.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Requisitos funcionais essenciais.}
 \label{tab:rf}
@@ -341,7 +358,7 @@ Os requisitos não funcionais mais determinantes para a arquitetura estão
 resumidos na Tabela~\ref{tab:rnf}, acompanhados da métrica adotada para
 verificá-los.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Requisitos não funcionais determinantes para o projeto.}
 \label{tab:rnf}
@@ -394,7 +411,7 @@ ser registrado e como reagir a dados incompletos. Levantadas na etapa anterior
 do projeto, permanecem válidas e são resumidas na
 Tabela~\ref{tab:regras-negocio}.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Regras de negócio do RANK-IA.}
 \label{tab:regras-negocio}
@@ -448,7 +465,7 @@ selecionadas apenas as que efetivamente restringem as decisões de projeto. As
 demais foram consideradas satisfeitas pelas práticas usuais de desenvolvimento
 web, e não são discutidas neste documento.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \setlength{\fboxsep}{12pt}
 \setlength{\fboxrule}{0.6pt}
@@ -510,7 +527,7 @@ same environment.
 A Tabela~\ref{tab:quality-goals} sintetiza os objetivos priorizados e o que cada
 um implica concretamente no projeto do sistema.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Objetivos de qualidade do RANK-IA.}
 \label{tab:quality-goals}
@@ -565,7 +582,6 @@ isolando o modelo atrás de uma abstração. Assim a experimentação fica conti
 em um único componente substituível, com consequências detalhadas nos
 Capítulos~\ref{cha:arquitetura} e \ref{cha:componentes}.
 
-% ============================================================================
 \chapter{Arquitetura do Sistema}\label{cha:arquitetura}
 % ============================================================================
 
@@ -573,19 +589,161 @@ Capítulos~\ref{cha:arquitetura} e \ref{cha:componentes}.
 decisões. O leitor deve conseguir compreender a estrutura geral do sistema
 antes de entrar nos detalhes de seus componentes.}
 
+Este capítulo descreve a disposição da arquitetura do sistema do RANK-IA, incluindo
+entidades externas, estilos arquiteturais adotados e unidades de execução.
+Cada estilo adotado responde a um objetivo de qualidade priorizado na 
+Seção~\ref{sec:quality-goals}, e cada decisão registrada na Seção~\ref{sec:decisoes} 
+pode ser lida como a resposta a um requisito, uma restrição legal ou o tamanho da equipe.
+
+A descrição segue o modelo C4, em seus três primeiros níveis:
+contexto, contêineres e componentes. O quarto nível, que detalha a
+implementação de um componente em classes, é tratado no
+Capítulo~\ref{cha:componentes}, junto com os princípios e padrões de projeto
+que ele evidencia.
+
 \section{Contexto e fronteiras do sistema}
 
 \orientacao{Apresentem um diagrama de contexto mostrando o sistema, seus
 principais usuários e os sistemas externos com os quais ele se comunica.
 Expliquem as relações mostradas no diagrama.}
 
-\section{Estilo ou padrão arquitetural}
+A Figura~\ref{fig:c4-contexto} apresenta o diagrama de contexto do sistema.
+O RANK-IA aparece como uma única caixa, cercado por duas categorias de atores
+e dois sistemas de terceiros.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.70\textwidth]{c4-nivel1-contexto.png}
+\caption{Diagrama de contexto do sistema (C4, nível 1).}
+\label{fig:c4-contexto}
+\end{figure}
+
+Os dois atores foram caracterizados na Tabela~\ref{tab:stakeholders}. O
+Gestor/RH opera o sistema, cadastrando colaboradores, parametrizando os
+critérios de formação, solicitando equipes e validando as sugestões. O
+Colaborador consome informações relacionadas a si mesmo, como competências,
+\textit{gaps}, treinamentos recomendados e as equipes de que participa.
+
+Dois dos sistemas são externos. O Serviço de e-mails é a
+infraestrutura de e-mail corporativo da própria organização cliente, usada
+para entregar notificações de equipe formada e recomendações de treinamento; o
+RANK-IA a consome, mas não a administra. A Plataforma de cursos é o
+catálogo consultado para converter uma lacuna identificada de um colaborador
+em uma capacitação. Nenhum dos dois é desenvolvido pela equipe, e devem ser 
+tratados como dependências substituíveis, sendo assim, trocar o provedor de e-mail 
+ou o catálogo de cursos não deve exigir alteração na lógica de negócio.
+
+Há uma terceira fronteira, que não é desenhada porque não é um sistema,
+porém de extrema importância. Pelo RNF02, os dados pessoais dos
+colaboradores não podem deixar o ambiente do cliente. Isso exclui, de partida,
+qualquer arquitetura que envie currículos ou perfis para um serviço de
+Inteligência Artificial de terceiros. O sistema é obrigado a hospedar seus
+próprios modelos, e essa obrigação sustenta sozinha boa parte da decomposição
+apresentada na Seção~\ref{sec:conteineres}.
+
+\FloatBarrier
+
+\section{Estilo ou padrão arquitetural}\label{sec:estilo}
 
 \orientacao{Identifiquem o(s) estilo(s) ou padrão(ões) arquitetural(is)
 adotado(s), quando aplicável, e justifiquem a escolha considerando as
 características do sistema e seus objetivos de qualidade.}
 
-\section{Contêineres e componentes}
+Adota-se aqui a distinção de \citet{pressman2021}: um estilo arquitetural
+estabelece a estrutura de todos os componentes do sistema, enquanto um padrão
+tem escopo menor e trata de um aspecto isolado da arquitetura. Sob essa
+definição, o RANK-IA não se utiliza de um estilo arquitetural único. Ele 
+combina cinco estilos, cada um restrito a um recorte. A Tabela~\ref{tab:estilos-adotados} 
+registra, para cada estilo, o subsistema em que ele se aplica e o objetivo 
+de qualidade que motivou a escolha.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Estilos arquiteturais adotados e seu escopo de aplicação.}
+\label{tab:estilos-adotados}
+\begin{tabularx}{0.97\textwidth}{p{0.19\textwidth} p{0.21\textwidth} X}
+\toprule
+\textbf{Estilo} & \textbf{Onde se aplica} & \textbf{Motivação} \\
+\midrule
+Cliente-servidor & Estilo dominante: \textit{frontend} $\leftrightarrow$ API, e
+API $\leftrightarrow$ serviços de IA & Aplicação web multiusuário. A
+autorização por perfil exigida pela RN04 precisa ser decidida no servidor,
+porque o cliente executa na máquina do usuário e não é confiável. \\
+Em camadas & Organização interna da API & Controladores, serviços de
+aplicação, domínio e infraestrutura, com as dependências apontando para
+dentro e expressas por interfaces. É o que operacionaliza a manutenibilidade
+priorizada na Seção~\ref{sec:quality-goals}. \\
+Centralizada em dados & Integração entre os componentes, via PostgreSQL &
+A RN07 exige rastrear todas as versões de uma equipe e a RN03, registrar todo
+ajuste manual. Ambas pressupõem uma fonte única e auditável. \\
+Fluxo de dados & Extração de currículos e re-treinamento do modelo &
+Uma sequência de etapas independentes na extração (extrair texto,
+identificar entidades, normalizar competências, validar, persistir), e
+processamento em lotes, uma vez por semana, no re-treinamento exigido pelo
+RNF09. \\
+Orientada a mensagens & Apenas na fronteira de \textit{upload} de currículo &
+A API confirma o recebimento imediatamente e o
+processamento ocorre depois, sem prender a requisição nem falhar se o serviço
+de extração estiver momentaneamente indisponível. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Estilos avaliados e descartados}
+
+Três dos estilos estudados na disciplina foram considerados e não se aplicam a
+este sistema. A Tabela~\ref{tab:estilos-descartados} faz o levantamento dos motivos
+que foram considerados para não seguir com esses estilos.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Estilos avaliados e descartados.}
+\label{tab:estilos-descartados}
+\begin{tabularx}{0.97\textwidth}{p{0.20\textwidth} X}
+\toprule
+\textbf{Estilo} & \textbf{Motivo da recusa} \\
+\midrule
+Microsserviços & Os dados do RANK-IA são muito interligados entre si. O RF06
+pede relatórios que cruzam colaboradores, equipes, desempenho e treinamentos
+numa única consulta; a RN03 e a RN07 exigem registrar o ajuste e criar a nova
+versão da equipe na mesma operação. Se cada serviço tivesse seu próprio banco,
+o relatório precisaria juntar dados vindos de bancos diferentes, e o registro
+de ajuste teria que garantir que duas escritas em bancos separados aconteçam
+juntas ou nenhuma delas aconteça --- as duas situações mais complicadas de
+resolver nesse estilo. \\
+Model-View-Controller & O MVC pressupõe que o servidor monta a tela (a Visão)
+a cada requisição. Aqui isso nunca acontece: o servidor só devolve dados em
+JSON, e quem monta a tela é o navegador, numa aplicação de página única. O que
+a API de fato tem é o estilo em camadas com controladores, já registrado na
+Tabela~\ref{tab:estilos-adotados}. \\
+Publish/Subscribe & Esse estilo compensa quando vários interessados
+independentes precisam reagir ao mesmo evento. No RANK-IA, cada evento tem um
+único interessado --- usá-lo aqui significaria montar toda a infraestrutura de
+um sistema de eventos só para fazer o que uma chamada de função direta já
+resolve. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A recusa dos microsserviços exige um esclarecimento, porque o sistema
+\textit{de fato} executa em processos separados, como mostra a
+Seção~\ref{sec:conteineres}. O que caracteriza o estilo de microsserviços é a 
+autonomia: implantação independente, dados descentralizados e ciclos de entrega
+desacoplados. O RANK-IA não possui nenhuma dessas propriedades, o banco é
+compartilhado, o repositório é único e existe uma versão em produção por vez,
+liberada por completo ao final de cada \textit{sprint}, conforme o
+Capítulo~\ref{cha:configuracao}. O sistema é, portanto, um
+monólito modular acompanhado de serviços especializados.
+
+Essa escolha é também uma decisão sobre orçamento de complexidade.
+Microsserviços resolvem um problema organizacional, onde existem times distintos que
+precisam liberar software em ritmos distintos, que este projeto não possui.
+
+\FloatBarrier
+
+\section{Contêineres e componentes}\label{sec:conteineres}
 
 \orientacao{Apresentem uma visão de alto nível da decomposição do sistema.
 Pode-se utilizar, quando adequado, os níveis de contexto, contêiner e
@@ -593,38 +751,254 @@ componente do modelo C4. Não basta inserir os diagramas: descrevam a
 responsabilidade dos elementos relevantes e as principais dependências ou
 comunicações entre eles.}
 
-%\section{Princípios de projeto}
-%
-%\orientacao{Expliquem os princípios de projeto discutidos na disciplina que
-%tiveram impacto efetivo na solução. Em vez de apenas enumerar princípios,
-%indiquem onde eles foram aplicados e que problema de projeto ajudaram a
-%resolver.}
+\subsection{Contêineres}
+
+A Figura~\ref{fig:c4-conteineres} amplia o diagrama de contexto e revela seis
+contêineres internos: cinco processos e um banco de dados.
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=0.82\textheight]{c4-nivel2-conteineres.png}
+\caption{Diagrama de contêineres (C4, nível 2).}
+\label{fig:c4-conteineres}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Contêineres do RANK-IA e suas responsabilidades.}
+\label{tab:conteineres}
+\begin{tabularx}{0.97\textwidth}{p{0.21\textwidth} p{0.17\textwidth} X}
+\toprule
+\textbf{Contêiner} & \textbf{Tecnologia} & \textbf{Responsabilidade} \\
+\midrule
+\textit{Frontend} & React, TypeScript & Interface de gestores e colaboradores:
+cadastro, solicitação e ajuste de equipes, relatórios e treinamentos. Não
+contém regra de negócio. \\
+API \textit{Backend} & Node.js, TypeScript & Lógica de negócio, autenticação e
+autorização por perfil, cálculo do Coeficiente de Aproveitamento, orquestração
+dos serviços de IA e único ponto de acesso ao banco. \\
+IA Geradora de Equipes & Python & Recebe critérios e o conjunto de
+colaboradores elegíveis e devolve composições candidatas ordenadas. Sem estado
+e sem acesso ao banco. \\
+IA Analista de Currículos & Python & Recebe um currículo em PDF e devolve
+habilidades e experiências estruturadas. Sem estado; o arquivo não é retido
+após o processamento. \\
+Banco de Dados & PostgreSQL & Colaboradores, competências, equipes e suas
+versões, histórico de ajustes, credenciais e a fila de ingestão de currículos. \\
+\textit{Pipeline} de re-treinamento & Python, execução em lote & Semanalmente:
+lê o histórico de ajustes, monta o conjunto de treino, treina, valida a nova
+versão contra a anterior e a publica. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A comunicação entre contêineres usa três protocolos. O \textit{frontend}
+conversa com a API por JSON sobre HTTPS; a API conversa com os dois serviços de
+IA pelo mesmo mecanismo, em rede interna e sem exposição externa; e o acesso ao
+PostgreSQL é feito por SQL sobre TCP. As notificações saem da API para o
+serviço de correio corporativo por SMTP.
+
+Duas propriedades dos processos não são visíveis no diagrama, porém são de extrema
+importância. A primeira é que os serviços de IA não acessam o banco de dados. Eles
+recebem por parâmetro tudo o que precisam e devolvem o resultado, sem manter
+estado entre chamadas. A segunda é que o Coeficiente de Aproveitamento é calculado pela API,
+e não pelo serviço de IA. A justificativa está detalhada na Seção~\ref{sec:decisoes}, decisão D5.
+
+\subsection{Componentes da API}
+
+A Figura~\ref{fig:c4-componentes} amplia o contêiner da API, o único cuja
+organização interna é complexa o bastante para justificar um terceiro nível de
+detalhe. Para preservar a legibilidade, os atores e os sistemas
+externos foram omitidos dessa visão. O Apêndice~\ref{ape:c4-detalhado}
+reúne a versão completa do diagrama, com esses elementos, a responsabilidade
+de cada componente por extenso e o protocolo em todas as relações.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{c4-nivel3-componentes.png}
+\caption{Componentes da API \textit{Backend} (C4, nível 3).}
+\label{fig:c4-componentes}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Componentes da API e requisitos que atendem.}
+\label{tab:componentes-api}
+\begin{tabularx}{0.97\textwidth}{p{0.27\textwidth} X p{0.15\textwidth}}
+\toprule
+\textbf{Componente} & \textbf{Responsabilidade} & \textbf{Atende} \\
+\midrule
+Gerenciador de Colaboradores & Cadastro, edição e manutenção de competências e
+\textit{gaps}; recebe currículos e enfileira a extração. & RF01, RN01 \\
+Controlador de Autenticação e Segurança & \textit{Middleware} de login, sessão
+e verificação de permissões, aplicado antes de qualquer controlador. & RF07,
+RN04, RNF01 \\
+Gerenciador de Equipes & Criação de equipes, ajuste manual e coordenação do
+fluxo de sugestão. & RF02, RF04 \\
+Calculadora do Coeficiente de Aproveitamento & Calcula o CA a partir da fórmula
+e dos pesos versionados. & RN05, RF03 \\
+Registro de Histórico e Versões & Grava cada ajuste manual com seu motivo e
+cria uma nova versão da equipe a cada alteração. & RN03, RN07 \\
+Serviço de Treinamentos e Relatórios & Relatórios de desempenho individual e
+coletivo; conversão de \textit{gaps} em cursos recomendados. & RF05, RF06,
+RN06 \\
+Notificador & Envio de notificações, atrás de uma abstração que isola o meio de
+entrega. & RIA-06 \\
+Repositório de Dados & Única porta de leitura e escrita no PostgreSQL, atrás
+das interfaces de repositório. & --- \\
+Cliente de Integração IA & Adaptador para os dois serviços em Python; traduz o
+vocabulário do domínio no contrato HTTP e vice-versa. & RNF07 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 
-\section{Decisões arquiteturais relevantes}
+\FloatBarrier
+
+\section{Decisões arquiteturais relevantes}\label{sec:decisoes}
 
 \orientacao{Registrem as decisões que tiveram impacto significativo na
 arquitetura. Para cada decisão, apresentem de forma breve a motivação,
 alternativas consideradas quando pertinente e principais consequências.}
 
-\begin{table}[ht]
+As decisões a seguir são as que produziram a forma descrita nas seções
+anteriores. Estão separadas em dois grupos: as que definem a estrutura geral do
+sistema e as que resolvem fronteiras específicas.
+
+\begin{table}[H]
 \centering
-\caption{Modelo para registrar decisões arquiteturais.}
-\begin{tabularx}{0.95\textwidth}{p{0.20\textwidth} X X}
+\small
+\caption{Decisões estruturais.}
+\label{tab:adr-estruturais}
+\begin{tabularx}{0.97\textwidth}{p{0.16\textwidth} X X}
 \toprule
-\textbf{Decisão} & \textbf{Motivação} & \textbf{Consequências} \\
+\textbf{Decisão} & \textbf{Motivação e alternativa descartada} &
+\textbf{Consequências} \\
 \midrule
-Exemplo & Por que essa alternativa foi escolhida? & Benefícios, limitações ou compromissos envolvidos. \\
+D1 - API como monólito modular & Várias operações do sistema mexem em mais
+de uma entidade ao mesmo tempo (equipe, colaborador, histórico), o que seria
+difícil de coordenar entre serviços separados. Descartado: microsserviços. &
+Não é possível atualizar um módulo sem reimplantar o sistema inteiro; em
+troca, não há risco de dados temporariamente diferentes entre módulos. \\
+D2 - IA em serviços Python separados & As bibliotecas de aprendizado de
+máquina são em Python e não rodam dentro do processo Node.js da API.
+Descartado: colocar a IA dentro da própria API. & Passam a existir dois
+serviços extras para implantar e manter, e um contrato HTTP entre eles que
+precisa ser versionado; em troca, o custo computacional da IA fica isolado da
+API, e o modelo pode ser trocado sem alterar as regras de negócio. \\
+D3 - Banco de dados único e compartilhado & Registrar o histórico e as
+versões de uma equipe exige que todos os dados estejam na mesma fonte.
+Descartado: um banco de dados por serviço. & Os contêineres passam a
+depender do mesmo esquema de banco, então qualquer alteração nele precisa
+ser coordenada entre todos eles. \\
+D4 - Serviços de IA sem estado e sem acesso ao banco & Concentra o acesso a
+dados pessoais em um único contêiner, o que facilita a proteção exigida pela
+LGPD. & A API precisa montar e enviar todos os dados necessários a cada
+chamada; em troca, os serviços de IA podem ser testados sozinhos, sem
+depender do banco. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\section{Restrições de arquitetura}
+\begin{table}[H]
+\centering
+\small
+\caption{Decisões de fronteira e de tecnologia.}
+\label{tab:adr-fronteira}
+\begin{tabularx}{0.97\textwidth}{p{0.16\textwidth} X X}
+\toprule
+\textbf{Decisão} & \textbf{Motivação e alternativa descartada} &
+\textbf{Consequências} \\
+\midrule
+D5 - Coeficiente de Aproveitamento calculado na API & O cálculo do CA é
+regra de negócio (RN05) e precisa valer também quando um gestor faz um ajuste
+manual, não só quando a IA gera a equipe. Descartado: calcular isso dentro do
+serviço de IA. & A fórmula fica isolada em um único lugar, sem risco de duas
+implementações divergentes; em troca, API e modelo precisam concordar sobre
+quais pesos usar nela. \\
+D6 - Ingestão de currículos assíncrona & Extrair dados de um PDF demora, e
+isso não pode atrasar a resposta ao usuário (RNF03). Descartado: um sistema
+de filas dedicado (como RabbitMQ) nesta versão. & A fila de currículos
+pendentes é apenas uma tabela no PostgreSQL, o que evita adicionar mais uma
+tecnologia ao sistema. \\
+D7 - Modelo de IA atrás de uma abstração & Espera-se trocar o modelo de IA
+várias vezes ao longo da vida do sistema (RNF07), então ele não pode estar
+espalhado pelo código. & Trocar de modelo passa a significar trocar apenas
+esse componente, e essa troca pode ser testada simulando a interface, sem
+precisar do modelo real. \\
+D8 - Nenhum serviço de IA de terceiros & A LGPD e o RNF02 proíbem que dados
+pessoais saiam do ambiente do cliente. Descartado: usar uma API de IA de
+terceiros. & É preciso treinar e hospedar os próprios modelos; é essa
+exigência que justifica a existência dos dois contêineres em Python. \\
+D9 - Autenticação por \textit{token} com autorização no servidor &
+Gestores e colaboradores têm permissões diferentes sobre os mesmos dados
+(RN04), e isso precisa ser verificado a cada requisição. & A API não guarda
+sessão de login; em troca, é o \textit{frontend} quem precisa lidar com o
+\textit{token} expirando ou sendo revogado. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Duas dessas decisões não são evidentes e convém desenvolvê-las.
+
+A decisão D2 foi feita devido à natureza das tecnologias utilizadas. A API é escrita em
+Node.js e as bibliotecas de aprendizado de máquina de que o projeto depende são
+do ecossistema Python. Trata-se de uma fronteira de linguagem.
+
+A decisão D5 corrige um problema identificado durante a revisão da
+arquitetura. Atribuir o cálculo do Coeficiente de Aproveitamento ao serviço de
+IA parece natural, já que é ele quem otimiza a composição. Mas o caso de uso de
+ajuste manual exige que o CA seja recalculado a cada troca de membro e, mais do
+que isso, que o sistema destaque os candidatos que maximizariam o coeficiente.
+O que significa avaliar diversas alternativas a cada interação do gestor.
+Com o cálculo do lado do serviço de IA, cada interação da interface se
+converteria em tráfego de rede, e a indisponibilidade do serviço interromperia
+justamente o ajuste manual, que é a garantia de supervisão humana sobre a qual
+o produto se apoia. A decisão adotada é tratar a fórmula do CA como regra de
+negócio residente no domínio da API, ou seja, o serviço de IA a recebe como função
+objetivo, parametrizada pelos mesmos pesos versionados, mas o valor exibido e
+persistido é sempre calculado pela API.
+
+\FloatBarrier
+
+\section{Restrições de arquitetura}\label{sec:restricoes-arq}
 
 \orientacao{Registrem restrições que limitem as decisões de arquitetura ou
 implementação, como tecnologias obrigatórias, integrações com sistemas
 existentes, ambiente de execução, restrições organizacionais ou convenções.
 Incluam apenas restrições efetivamente relevantes ao projeto.}
+
+As restrições a seguir não foram escolhidas pela equipe: são condições dadas
+pelo cliente, pela legislação ou pelo contexto do projeto, e limitam o espaço
+de soluções.
+
+\begin{itemize}[nosep]
+    \item \textbf{Acesso exclusivamente por navegador}, sem instalação e sem
+    \textit{plugins}, com interface responsiva a partir de 1024~px em Chrome,
+    Firefox e Edge (RNF06). Exclui aplicação nativa e qualquer recurso
+    dependente de navegador específico.
+    \item \textbf{Conformidade com a LGPD} (RNF02): dados pessoais de
+    colaboradores não cruzam a fronteira do sistema. Nenhuma dependência de
+    serviço de IA de terceiros, e nenhuma cópia da base de produção em
+    ambiente de desenvolvimento ou homologação.
+    \item \textbf{O modelo opera apenas sobre dados fornecidos pela
+    organização}, sem enriquecimento por fontes externas.
+    \item \textbf{Validação humana obrigatória}: o sistema não toma decisões
+    automáticas sobre pessoas. Em consequência, a arquitetura precisa
+    permanecer utilizável em modo de consulta e ajuste manual mesmo com os
+    serviços de IA indisponíveis.
+    \item \textbf{Equipe de quatro integrantes em um semestre letivo}, com
+    entregas a cada duas semanas. É o orçamento de complexidade operacional
+    disponível, e foi determinante para a decisão D1.
+    \item \textbf{Repositório único com liberação unificada}: uma versão em
+    produção por vez, identificada por uma \textit{tag} semântica por
+    \textit{sprint}, conforme o Capítulo~\ref{cha:configuracao}.
+    \item \textbf{Conjunto de tecnologias fixado pela competência da equipe}:
+    React e TypeScript no \textit{frontend}, Node.js e TypeScript na API,
+    Python nos serviços de IA e PostgreSQL na persistência.
+\end{itemize}
 
 % ============================================================================
 \chapter{Projeto de Componentes}\label{cha:componentes}
@@ -658,12 +1032,6 @@ objetivo de qualidade na Seção~\ref{sec:quality-goals}.
 sistemas maiores, esta visão geral pode cobrir todos os componentes, enquanto
 o detalhamento das seções seguintes pode se concentrar apenas nos mais
 relevantes ou complexos.}
-
-A Tabela~\ref{tab:componentes} reúne os componentes do módulo de equipes e suas
-responsabilidades. A separação segue uma diretriz única: cada componente tem um,
-e apenas um, motivo para mudar --- a lógica de negócio, a persistência, a
-comunicação com a IA e a notificação são responsabilidades distintas, alocadas a
-componentes distintos.
 
 \begin{table}[H]
 \centering
@@ -914,10 +1282,10 @@ documento e forneçam o link para o material completo.}
 software e reduzir o risco de defeitos. O capítulo deve apresentar uma
 estratégia coerente, e não apenas uma lista de ferramentas.}
 
-A estratégia de testes do RANK-IA acompanha a divisão em quatro processos e um
-banco de dados descrita no Capítulo~\ref{cha:configuracao}: o
+A estratégia de testes do RANK-IA acompanha a divisão em cinco processos e um
+banco de dados descrita no Capítulo~\ref{cha:arquitetura}: o
 \textit{frontend}, a API, os dois serviços em Python (IA Geradora de Equipes e
-IA Analista de Currículos) e o PostgreSQL. Cada nível de teste cobre um tipo de
+IA Analista de Currículos), o \textit{pipeline} de re-treinamento e o PostgreSQL. Cada nível de teste cobre um tipo de
 defeito que os outros não alcançam, e nenhum substitui os demais.
 
 A estratégia separa dois papéis complementares. A verificação pergunta
@@ -991,7 +1359,7 @@ foram isoladas atrás de abstrações desde o projeto de componentes: é o
 pagamento concreto da manutenibilidade do Capítulo~\ref{cha:componentes}. A
 Tabela~\ref{tab:testes-unidade} reúne exemplos.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Exemplos de casos de teste de unidade.}
 \label{tab:testes-unidade}
@@ -1582,7 +1950,7 @@ existe e é percorrível nos dois sentidos, tanto do requisito até o teste que 
 verifica quanto de um \textit{commit} qualquer de volta até a necessidade que o
 originou.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Exemplos de rastreabilidade entre artefatos.}
 \label{tab:rastreabilidade}
@@ -1622,7 +1990,7 @@ como o processo é realizado manualmente.}
 
 \subsection{Construção local}
 
-O sistema é composto por quatro processos e um banco de dados, cada um com suas
+O sistema é composto por cinco processos e um banco de dados, cada um com suas
 próprias exigências de versão de tempo de execução, de bibliotecas nativas e de
 configuração. Montar esse ambiente manualmente é demorado, mas o problema maior
 não é o tempo: é que cada integrante acabaria com uma combinação ligeiramente
@@ -1677,7 +2045,7 @@ situações: a cada \textit{push} em um \textit{branch} de trabalho e a cada
 \textit{pull request} aberto ou atualizado para a \texttt{main}. A
 Tabela~\ref{tab:ci} descreve os trabalhos que compõem a esteira.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Verificações automatizadas executadas pela integração contínua.}
 \label{tab:ci}
@@ -1771,7 +2139,7 @@ trabalho que o originou e pode ser revertido em minutos.
 %necessária para a compreensão do documento. Excluam este capítulo se ele não
 %for necessário.}
 %
-%\begin{table}[ht]
+%\begin{table}[H]
 %\centering
 %\caption{Exemplo de glossário e siglas.}
 %\begin{tabularx}{0.90\textwidth}{p{0.25\textwidth} X}
@@ -1792,7 +2160,7 @@ trabalho que o originou e pode ser revertido em minutos.
 Este controle se refere ao documento; o versionamento do software deve ser
 descrito no capítulo de Gestão de Configuração e Manutenção.}
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Histórico de versões do documento.}
 \begin{tabularx}{0.95\textwidth}{p{0.21\textwidth} p{0.19\textwidth} p{0.12\textwidth} X}
@@ -1816,6 +2184,43 @@ DD/MM/AAAA & Equipe & 1.0 & Versão inicial para entrega. \\
 %
 % \chapter{Casos de Teste}
 % ...
+
+% ============================================================================
+% APÊNDICES
+% ============================================================================
+\appendix
+\renewcommand{\chaptername}{\appendixname}
+
+\chapter{Diagrama de Componentes Detalhado}\label{ape:c4-detalhado}
+
+A Figura~\ref{fig:c4-componentes}, no Capítulo~\ref{cha:arquitetura}, é
+deliberadamente enxuta. Ela omite os atores e os sistemas externos, e reduz a
+descrição de cada componente aos requisitos que ele atende, para caber legível
+na largura da página. Essa escolha privilegia a leitura corrida: quem percorre
+o capítulo precisa enxergar a estrutura e as dependências, e encontra o detalhe
+na Tabela~\ref{tab:componentes-api}, logo abaixo dela.
+
+Este apêndice reúne a versão de referência do mesmo diagrama, com tudo o que
+foi omitido: os dois perfis de usuário, os sistemas de terceiros, o
+\textit{pipeline} de re-treinamento previsto pelo RNF09, a responsabilidade de
+cada componente por extenso e o protocolo de comunicação em todas as relações.
+Destina-se à consulta pontual durante a implementação --- para localizar quem
+chama quem, e por qual contrato --- e não à leitura sequencial. Por ser larga, a figura é
+apresentada em orientação paisagem, ocupando uma página inteira.
+
+Os dois diagramas são gerados a partir de arquivos-fonte distintos, versionados
+em \texttt{projeto/diagramas/}, e não de uma imagem editada à mão. Alterar a
+arquitetura exige alterar o texto que a descreve, o que mantém as duas versões
+coerentes entre si e torna a mudança visível na revisão de código.
+
+\begin{figure}[p]
+\centering
+\includegraphics[angle=90,height=0.92\textheight]{c4-nivel3-detalhado.png}
+\caption{Componentes da API \textit{Backend} --- versão detalhada (C4, nível 3).}
+\label{fig:c4-detalhado}
+\end{figure}
+
+\FloatBarrier
 
 % ============================================================================
 % REFERÊNCIAS

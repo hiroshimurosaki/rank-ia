@@ -17,3 +17,6 @@ Thumbs.db
 
 # Diretório de build do LaTeX (latexmk -outdir=build)
 build/
+
+# Ferramentas locais (plantuml.jar, etc.)
+tools/

@@ -51,5 +51,28 @@ final continua sendo gerado direto em `projeto/documentacao-rank-ia.pdf`. Com
 TeX Live, o equivalente é `-output-directory=build`, mas nesse caso o PDF
 também vai parar em `build/` e precisa ser copiado de volta.
 
+### Outras formas de compilar
+
+O comando manual acima não é a única opção. O repositório já traz dois
+arquivos de configuração que fazem a mesma redireção para `build/` sozinhos,
+dependendo da ferramenta que você usa. Nenhum dos dois interfere se você não usa
+a ferramenta correspondente --- são arquivos que cada programa lê por conta
+própria, e ignorados silenciosamente por qualquer outro.
+
+**`latexmk` direto pelo terminal** --- `projeto/.latexmkrc` já define
+`aux_dir` e `out_dir`, então basta:
+
+```bash
+cd projeto
+latexmk -pdf documentacao-rank-ia.tex
+```
+
+sem precisar repetir as flags do bloco acima.
+
+**VS Code com a extensão LaTeX Workshop** --- `.vscode/settings.json` já
+configura o `auxDir` usado pelo botão `Build LaTeX project`, pela mesma
+razão: a extensão passa `-auxdir` na chamada do `latexmk` e isso
+sobrescreveria o `.latexmkrc` se não fosse alinhado aqui.
+
 > Antes da entrega final, trocar `\orientacoestrue` por `\orientacoesfalse` no início do
 > `documentacao-rank-ia.tex` para ocultar as orientações do template.

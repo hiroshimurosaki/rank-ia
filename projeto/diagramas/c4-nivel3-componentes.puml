@@ -1,0 +1,74 @@
+@startuml c4-nivel3-componentes
+' ============================================================================
+' RANK-IA -- Diagrama de Componentes da API Backend (C4, nivel 3)
+' Fonte versionada. Exportar para ../images/c4-nivel3-componentes.png
+'
+' Formato horizontal, para entrar na pagina SEM rotacao.
+' Como a largura util da pagina e ~17 cm, o conteudo aqui e deliberadamente
+' enxuto: quanto menos texto por caixa, maior a fonte depois de reduzida.
+'
+' Omitido de proposito, por ja aparecer nos niveis 1 e 2:
+'   - os atores (Gestor/RH e Colaborador), que falam com o Frontend;
+'   - os sistemas externos (Servico de e-mails e Plataforma de cursos).
+' A responsabilidade completa de cada componente esta na Tabela 2.3.
+'
+' Tres componentes nao existiam na versao do Miro e sao exigidos por regra
+' de negocio: Calculadora do CA (RN05), Registro de Historico e Versoes
+' (RN03, RN07) e Notificador (RIA-06).
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.12.0/C4_Component.puml
+
+LAYOUT_TOP_DOWN()
+HIDE_STEREOTYPE()
+
+skinparam dpi 200
+skinparam defaultFontSize 16
+skinparam ArrowFontSize 14
+skinparam WrapWidth 165
+skinparam nodesep 20
+skinparam ranksep 38
+
+title Componentes da API Backend — RANK-IA
+
+Container(frontend, "Frontend", "React", "Interface web")
+
+Container_Boundary(api, "API Backend [Node.js, TypeScript]") {
+    Component(auth, "Controlador de Autenticação e Segurança", "middleware", "RF07, RN04")
+    Component(colabs, "Gerenciador de Colaboradores", "Node.js", "RF01, RN01")
+    Component(equipes, "Gerenciador de Equipes", "Node.js", "RF02, RF04")
+    Component(treinamentos, "Serviço de Treinamentos e Relatórios", "Node.js", "RF05, RF06")
+
+    Component(ca, "Calculadora do Coeficiente de Aproveitamento", "Node.js", "RN05, RF03")
+    Component(historico, "Registro de Histórico e Versões", "Node.js", "RN03, RN07")
+    Component(notificador, "Notificador", "Node.js", "INotificadorService")
+
+    Component(repo, "Repositório de Dados", "Node.js", "Única porta ao banco")
+    Component(clienteIa, "Cliente de Integração IA", "Node.js", "IIAGeradoraService")
+}
+
+ContainerDb(db, "Banco de Dados", "PostgreSQL", " ")
+Container(iaEquipes, "IA Geradora de Equipes", "Python", " ")
+Container(iaCurriculos, "IA Analista de Currículos", "Python", " ")
+
+Rel(frontend, auth, "Autentica")
+Rel(frontend, colabs, "Cadastra")
+Rel(frontend, equipes, "Solicita e ajusta")
+Rel(frontend, treinamentos, "Consulta")
+
+Rel(equipes, ca, "Calcula CA")
+Rel(equipes, historico, "Versiona")
+Rel(equipes, clienteIa, "Compõe")
+Rel(equipes, notificador, "Notifica")
+Rel(colabs, clienteIa, "Extrai currículo")
+Rel(treinamentos, notificador, "Notifica")
+
+Rel(auth, repo, "Credenciais")
+Rel(colabs, repo, "Colaboradores")
+Rel(equipes, repo, "Equipes")
+Rel(historico, repo, "Histórico")
+Rel(treinamentos, repo, "Desempenho")
+
+Rel(repo, db, "SQL/TCP")
+Rel(clienteIa, iaEquipes, "JSON/HTTPS")
+Rel(clienteIa, iaCurriculos, "JSON/HTTPS")
+@enduml
